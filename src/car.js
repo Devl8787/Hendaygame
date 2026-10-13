@@ -34,14 +34,14 @@ const SPAWN_HEIGHT = 1.2;
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
 export class Car {
-  // spawn: { x, z, heading } where heading turns local +x toward the direction of travel.
+  // spawn: { x, y?, z, heading } where heading turns local +x toward the direction of travel.
   constructor(scene, world, spawn) {
     this.steer = 0;
     this.onGrass = false; // set by the game each frame
 
     this.body = world.createRigidBody(
       RAPIER.RigidBodyDesc.dynamic()
-        .setTranslation(spawn.x, SPAWN_HEIGHT, spawn.z)
+        .setTranslation(spawn.x, (spawn.y ?? 0) + SPAWN_HEIGHT, spawn.z)
         .setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, spawn.heading))
         .setCanSleep(false)
         .setLinearDamping(0.05)
@@ -135,7 +135,7 @@ export class Car {
 
   // Puts the car back on its wheels at the given pose, stopped.
   reset(pose) {
-    this.body.setTranslation({ x: pose.x, y: SPAWN_HEIGHT, z: pose.z }, true);
+    this.body.setTranslation({ x: pose.x, y: (pose.y ?? 0) + SPAWN_HEIGHT, z: pose.z }, true);
     this.body.setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, pose.heading), true);
     this.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
     this.body.setAngvel({ x: 0, y: 0, z: 0 }, true);

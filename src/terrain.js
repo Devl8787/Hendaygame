@@ -14,17 +14,23 @@ const RIVER_OUTSIDE = 900; // how far the river runs on past the loop
 const CELL = 6; // terrain grid spacing, metres
 const MARGIN = 700; // terrain detail beyond the track, metres
 const EDGE_FADE = 300; // the valley flattens out over the last stretch before the edge
+const DIP_CUT_HALF = 10; // ground stays just under the road this far from its centre line
+const DIP_CUT_BELOW = 0.4; // ...this far under it
+const DIP_CUT_SLOPE = 1.5; // then slopes back up, horizontal metres per metre
 
 export class Terrain {
   // crossings: [{ x, z, tx, tz }] where the river crosses the loop (centre
   // line point and road direction). extent: half-size of the track in metres.
   // cuttings: [{ x, z, ux, uz }] where a road dips under the Henday (centre
   // point and the crossing road's direction).
-  constructor(crossings, extent, cuttings = []) {
+  // dips: [[x, z, y], ...] road points below ground level (the dip toward
+  // the river); the ground is cut down to just under them.
+  constructor(crossings, extent, cuttings = [], dips = []) {
     this.river = riverLine(crossings);
     this.cuttings = cuttings;
     this.half = Math.ceil((extent + MARGIN) / CELL) * CELL;
     this.buckets = bucketSegments(this.river, VALLEY_HALF_WIDTH + 10);
+    this.dips = bucketPoints(dips, DIP_CUT_HALF + DIP_CUT_SLOPE * 8);
   }
 
   // Ground height at (x, z): 0 on the prairie, lower in the river valley and
@@ -33,7 +39,20 @@ export class Terrain {
     if (Math.abs(x) > this.half || Math.abs(z) > this.half) return 0;
     let h = this.valleyHeight(x, z);
     for (const c of this.cuttings) h = Math.min(h, cuttingHeight(c, x, z));
-    return h;
+    return Math.min(h, this.dipCut(x, z));
+  }
+
+  // Ground under a dipping road: just below it across the road, then
+  // sloping back up to the surrounding ground.
+  dipCut(x, z) {
+    const near = this.dips.get(bucketKey(x, z));
+    if (!near) return 0;
+    let cut = 0;
+    for (const [px, pz, py] of near) {
+      const d = Math.hypot(x - px, z - pz);
+      cut = Math.min(cut, py - DIP_CUT_BELOW + Math.max(0, d - DIP_CUT_HALF) / DIP_CUT_SLOPE);
+    }
+    return cut;
   }
 
   valleyHeight(x, z) {
@@ -220,6 +239,24 @@ function riverLine(crossings) {
 // Spatial buckets of river segments so height lookups only check nearby ones.
 const BUCKET = 100;
 const bucketKey = (x, z) => `${Math.floor(x / BUCKET)},${Math.floor(z / BUCKET)}`;
+
+function bucketPoints(points, pad) {
+  const buckets = new Map();
+  for (const p of points) {
+    const x0 = Math.floor((p[0] - pad) / BUCKET);
+    const x1 = Math.floor((p[0] + pad) / BUCKET);
+    const z0 = Math.floor((p[1] - pad) / BUCKET);
+    const z1 = Math.floor((p[1] + pad) / BUCKET);
+    for (let bx = x0; bx <= x1; bx++) {
+      for (let bz = z0; bz <= z1; bz++) {
+        const key = `${bx},${bz}`;
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key).push(p);
+      }
+    }
+  }
+  return buckets;
+}
 
 function bucketSegments(line, pad) {
   const buckets = new Map();

@@ -43,6 +43,7 @@ export function buildWorkZone(scene, world, c, s, lane) {
   const place = (object, d, offset, yaw = 0) => {
     const pose = sampleAt(c, s + d, offset);
     object.position.x = pose.x;
+    object.position.y += pose.y; // the road dips toward the river
     object.position.z = pose.z;
     object.quaternion.setFromAxisAngle(Y_AXIS, pose.heading + yaw);
     scene.add(object);
@@ -52,7 +53,7 @@ export function buildWorkZone(scene, world, c, s, lane) {
   const solid = (pose, yaw, hx, hy, hz, y = hy) => {
     const body = world.createRigidBody(
       RAPIER.RigidBodyDesc.fixed()
-        .setTranslation(pose.x, y, pose.z)
+        .setTranslation(pose.x, pose.y + y, pose.z)
         .setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, pose.heading + yaw)),
     );
     world.createCollider(RAPIER.ColliderDesc.cuboid(hx, hy, hz), body);
@@ -68,7 +69,7 @@ export function buildWorkZone(scene, world, c, s, lane) {
     const f = d / TAPER;
     const offset = edge * (half - 0.3 - f * (LANE_WIDTH - 0.6));
     const pose = sampleAt(c, s + d, offset);
-    const body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(pose.x, 0.35, pose.z));
+    const body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(pose.x, pose.y + 0.35, pose.z));
     world.createCollider(RAPIER.ColliderDesc.cone(0.35, 0.2).setDensity(40), body);
     const mesh = new THREE.Mesh(coneGeo, MATS.cone);
     mesh.castShadow = true;

@@ -212,8 +212,10 @@ class Interchange {
     const along = (pose) => new THREE.Vector3(Math.cos(pose.heading), 0, -Math.sin(pose.heading));
     const startPose = sampleAt(c, s0 - RAMP_REACH, edge);
     const endPose = sampleAt(c, s0 + RAMP_REACH, edge);
-    const start = new THREE.Vector3(startPose.x, 0, startPose.z);
-    const end = new THREE.Vector3(endPose.x, 0, endPose.z);
+    // Ramps leave and join the Henday at its height (it may be dipping toward
+    // the river) and meet the crossing road at ground level.
+    const start = new THREE.Vector3(startPose.x, startPose.y, startPose.z);
+    const end = new THREE.Vector3(endPose.x, endPose.y, endPose.z);
     const toCross = this.t.clone().multiplyScalar(dir);
 
     const offRamp = new THREE.CubicBezierCurve3(
@@ -241,7 +243,7 @@ class Interchange {
     // Green exit sign on the shoulder before the off-ramp.
     const signPose = sampleAt(c, s0 - RAMP_REACH - 110, c.width(best) / 2 + RIGHT_SHOULDER + 1.5);
     const sign = buildExitSign(shortName(this.spec.name), this.closedText);
-    sign.position.set(signPose.x, 0, signPose.z);
+    sign.position.set(signPose.x, signPose.y, signPose.z);
     sign.rotation.y = signPose.heading;
     this.add(sign);
   }
@@ -257,13 +259,13 @@ class Interchange {
       const a = points[Math.max(0, i - 1)];
       const b = points[Math.min(points.length - 1, i + 1)];
       const d = b.clone().sub(a).normalize();
-      return { p: new THREE.Vector3(p.x, 0.025, p.z), side: new THREE.Vector3(-d.z, 0, d.x) };
+      return { p: new THREE.Vector3(p.x, p.y + 0.025, p.z), side: new THREE.Vector3(-d.z, 0, d.x) };
     });
     const ramp = groundLayer(new THREE.Mesh(strip(withSide, RAMP_HALF + 0.6), mats.asphalt()), LAYER.asphalt);
     ramp.receiveShadow = true;
     this.add(ramp);
     for (const off of [-RAMP_HALF, RAMP_HALF]) {
-      const shifted = withSide.map(({ p, side }) => ({ p: p.clone().add(side.clone().multiplyScalar(off)).setY(0.045), side }));
+      const shifted = withSide.map(({ p, side }) => ({ p: p.clone().add(side.clone().multiplyScalar(off)).setY(p.y + 0.02), side }));
       this.add(groundLayer(new THREE.Mesh(strip(shifted, 0.08), mats.white), LAYER.paint));
     }
   }
@@ -272,13 +274,13 @@ class Interchange {
   barricade(p, forward) {
     const heading = Math.atan2(-forward.z, forward.x);
     const barrier = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.85, RAMP_HALF * 2 + 1.5), mats.concrete);
-    barrier.position.set(p.x, 0.425, p.z);
+    barrier.position.set(p.x, p.y + 0.425, p.z);
     barrier.rotation.y = heading;
     barrier.castShadow = true;
     this.add(barrier);
     const body = this.world.createRigidBody(
       RAPIER.RigidBodyDesc.fixed()
-        .setTranslation(p.x, 0.425, p.z)
+        .setTranslation(p.x, p.y + 0.425, p.z)
         .setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, heading)),
     );
     this.world.createCollider(RAPIER.ColliderDesc.cuboid(0.3, 0.425, RAMP_HALF + 0.75), body);
@@ -287,7 +289,7 @@ class Interchange {
       const barrel = buildBarrel();
       barrel.position.copy(p).add(right.clone().multiplyScalar(off)).sub(forward.clone().multiplyScalar(1.6));
       this.add(barrel);
-      this.solid(barrel.position.clone().setY(0.5), RAPIER.ColliderDesc.cylinder(0.5, 0.35));
+      this.solid(barrel.position.clone().setY(p.y + 0.5), RAPIER.ColliderDesc.cylinder(0.5, 0.35));
     }
   }
 

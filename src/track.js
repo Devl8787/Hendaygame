@@ -252,9 +252,40 @@ function prepare(track, isTestStrip) {
     c.width = (i) => c.widths[i];
     const [lx, lz] = pts[n - 1];
     c.totalLength = c.distance[n - 1] + (c.closed ? Math.hypot(pts[0][0] - lx, pts[0][1] - lz) : 0);
+    c.elevation = roadElevation(c, track.river ?? []);
   }
   track.isTestStrip = isTestStrip;
   return track;
+}
+
+// The road dips down into the river valley onto the bridge and climbs back
+// out, like the real Henday: DIP metres lower over the crossing, easing
+// back to ground level DIP_REACH metres either side.
+export const DIP = 6;
+const DIP_FLAT = 40; // metres either side of the crossing at full depth
+export const DIP_REACH = 180;
+function roadElevation(c, crossings) {
+  const n = c.points.length;
+  const elevation = new Float32Array(n);
+  for (const r of crossings) {
+    let best = 0;
+    let bestD = Infinity;
+    c.points.forEach(([x, z], i) => {
+      const d = (x - r.x) ** 2 + (z - r.z) ** 2;
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    });
+    const at = c.distance[best];
+    for (let i = 0; i < n; i++) {
+      let d = Math.abs(c.distance[i] - at);
+      if (c.closed) d = Math.min(d, c.totalLength - d);
+      const t = Math.min(Math.max((d - DIP_FLAT) / (DIP_REACH - DIP_FLAT), 0), 1);
+      elevation[i] = Math.min(elevation[i], -DIP * (1 - t * t * (3 - 2 * t)));
+    }
+  }
+  return elevation;
 }
 
 // Road width at each point, eased over ~60 m where the lane count changes
@@ -286,6 +317,7 @@ export function poseAt(carriageway, i, offset = 0) {
   // Facing (tx, tz), the right-hand side is (-tz, tx).
   return {
     x: x - tz * offset,
+    y: carriageway.elevation?.[i] ?? 0,
     z: z + tx * offset,
     // Rotation about y that turns the car's local +x onto the tangent.
     heading: Math.atan2(-tz, tx),
@@ -318,6 +350,7 @@ export function sampleAt(c, distance, offset = 0) {
   return {
     x: lerp(c.points[i][0], c.points[j][0]) - tz * offset,
     z: lerp(c.points[i][1], c.points[j][1]) + tx * offset,
+    y: c.elevation ? lerp(c.elevation[i], c.elevation[j]) : 0,
     heading: Math.atan2(-tz, tx),
     index: i,
   };

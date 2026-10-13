@@ -67,7 +67,14 @@ function addGround(scene, world, track) {
     // Roads passing under the Henday get a cutting; the crossing road runs
     // across the Henday (along its right-hand normal).
     const cuttings = (track.interchanges ?? []).filter((i) => !i.over).map((i) => ({ x: i.x, z: i.z, ux: -i.tz, uz: i.tx }));
-    const terrain = new Terrain(track.river, extent, cuttings);
+    // Where the road dips toward the river, the ground is cut down to it.
+    const dips = [];
+    for (const c of track.carriageways) {
+      c.points.forEach(([x, z], i) => {
+        if (c.elevation[i] < -0.01) dips.push([x, z, c.elevation[i]]);
+      });
+    }
+    const terrain = new Terrain(track.river, extent, cuttings, dips);
     terrain.build(scene, world);
     return terrain;
   }
@@ -88,6 +95,7 @@ function addGround(scene, world, track) {
 
 // Flags every road point that crosses the valley as bridge (point[3] = 1),
 // plus a run-on at each end so the guardrails start well before the drop.
+// (Ground cut just below a dipping road doesn't count; a real drop does.)
 function markBridges(track, terrain) {
   const RUN_ON = 20; // points (~60 m)
   for (const c of track.carriageways) {
@@ -96,7 +104,7 @@ function markBridges(track, terrain) {
       const reach = c.width(i) / 2 + RIGHT_SHOULDER;
       return [-reach, 0, reach].some((offset) => {
         const p = poseAt(c, i, offset);
-        return terrain.heightAt(p.x, p.z) < -0.25;
+        return terrain.heightAt(p.x, p.z) < p.y - 1;
       });
     });
     for (let i = 0; i < n; i++) {
@@ -107,53 +115,64 @@ function markBridges(track, terrain) {
   }
 }
 
-// Bridge deck, piers and barriers you can't drive through, for every bridge run.
-const DECK_SEGMENT = 6; // points per deck piece (~18 m)
+// Solid road wherever it leaves the ground: on bridges, and along the dip
+// down to the river where the ground is cut away beneath it. Bridges also
+// get a concrete deck, piers and guardrails you can't drive through.
+const DECK_SEGMENT = 3; // points per deck piece (~9 m): short, so straight pieces follow the dip's curve
 const PIER_EVERY = 10; // points (~30 m)
+const DECK_DEPTH = 1.2;
+const DIP_MARGIN = 10; // points (~30 m) the slab runs on past the dip
 function addBridgeStructures(scene, world, c, terrain) {
   const n = c.points.length;
   const concrete = new THREE.MeshStandardMaterial({ color: 0xb9b6ad, roughness: 0.9 });
-  const deckDepth = 1.2;
   const left = (i) => -c.width(i) / 2 - LEFT_SHOULDER;
   const right = (i) => c.width(i) / 2 + RIGHT_SHOULDER;
-  const fixed = (x, y, z, heading, desc) => {
+  const fixed = (position, rotation, desc) => {
     const body = world.createRigidBody(
-      RAPIER.RigidBodyDesc.fixed()
-        .setTranslation(x, y, z)
-        .setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, heading)),
+      RAPIER.RigidBodyDesc.fixed().setTranslation(position.x, position.y, position.z).setRotation(rotation),
     );
     world.createCollider(desc, body);
   };
 
   for (let i = 0; i < n; i += DECK_SEGMENT) {
     const j = Math.min(i + DECK_SEGMENT, c.closed ? n : n - 1) % n;
-    if (c.points[i][3] !== 1 && c.points[j][3] !== 1) continue;
-    // A deck piece from point i to point j, as wide as the road and shoulders.
+    const bridge = c.points[i][3] === 1 || c.points[j][3] === 1;
+    // The ground is cut a little beyond the last dipping point, so the slab
+    // carries on past it too.
+    let dipping = false;
+    for (let k = i - DIP_MARGIN; k <= i + DECK_SEGMENT + DIP_MARGIN && !dipping; k++) {
+      dipping = c.elevation[((k % n) + n) % n] < -0.01;
+    }
+    if (!bridge && !dipping) continue;
+    // A slab from point i to point j, as wide as the road and shoulders,
+    // tilted to follow the road up or down.
     const a = poseAt(c, i, (left(i) + right(i)) / 2);
     const b = poseAt(c, j, (left(j) + right(j)) / 2);
-    const length = Math.hypot(b.x - a.x, b.z - a.z) + 0.6;
-    const heading = Math.atan2(-(b.z - a.z), b.x - a.x);
+    const flat = Math.hypot(b.x - a.x, b.z - a.z);
+    const length = Math.hypot(flat, b.y - a.y) + 0.6;
+    const rotation = new THREE.Quaternion()
+      .setFromAxisAngle(Y_AXIS, Math.atan2(-(b.z - a.z), b.x - a.x))
+      .multiply(new THREE.Quaternion().setFromAxisAngle(Z_AXIS, Math.atan2(b.y - a.y, flat)));
+    const up = Y_AXIS.clone().applyQuaternion(rotation);
+    const across = Z_AXIS.clone().applyQuaternion(rotation);
+    const top = new THREE.Vector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
+    const centre = top.clone().addScaledVector(up, -DECK_DEPTH / 2);
     const halfWidth = (right(i) - left(i)) / 2;
-    const mx = (a.x + b.x) / 2;
-    const mz = (a.z + b.z) / 2;
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(length, deckDepth, halfWidth * 2), concrete);
-    deck.position.set(mx, -deckDepth / 2, mz);
-    deck.rotation.y = heading;
+    fixed(centre, rotation, RAPIER.ColliderDesc.cuboid(length / 2, DECK_DEPTH / 2, halfWidth));
+    if (!bridge) continue;
+
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(length, DECK_DEPTH, halfWidth * 2), concrete);
+    // Tucked a touch under the asphalt so its top never shows through.
+    deck.position.copy(centre).addScaledVector(up, -0.06);
+    deck.quaternion.copy(rotation);
     deck.castShadow = deck.receiveShadow = true;
     scene.add(deck);
-    fixed(mx, -deckDepth / 2, mz, heading, RAPIER.ColliderDesc.cuboid(length / 2, deckDepth / 2, halfWidth));
     // Guardrails along both edges (the visible walls come from addBridgeBarriers).
     // Rounded and overlapping at the joints so a car glances off instead of
     // snagging on a corner where two straight pieces meet on a curve.
     for (const side of [-1, 1]) {
-      const ox = Math.sin(heading) * side * (halfWidth - 0.15);
-      const oz = Math.cos(heading) * side * (halfWidth - 0.15);
-      const body = world.createRigidBody(
-        RAPIER.RigidBodyDesc.fixed()
-          .setTranslation(mx + ox, 0.75, mz + oz)
-          .setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, heading).multiply(LYING_DOWN)),
-      );
-      world.createCollider(RAPIER.ColliderDesc.capsule(length / 2, 0.3), body);
+      const rail = top.clone().addScaledVector(across, side * (halfWidth - 0.15)).addScaledVector(up, 0.75);
+      fixed(rail, rotation.clone().multiply(LYING_DOWN), RAPIER.ColliderDesc.capsule(length / 2, 0.3));
     }
   }
 
@@ -164,19 +183,20 @@ function addBridgeStructures(scene, world, c, terrain) {
     for (const offset of [left(i) + 2, right(i) - 2]) {
       const p = poseAt(c, i, offset);
       const ground = terrain.heightAt(p.x, p.z);
-      const height = -deckDepth - ground;
+      const height = p.y - DECK_DEPTH - ground;
       if (height < 2) continue;
       const pier = new THREE.Mesh(pierGeo, concrete);
       pier.scale.y = height;
       pier.position.set(p.x, ground + height / 2, p.z);
       pier.castShadow = true;
       scene.add(pier);
-      fixed(p.x, ground + height / 2, p.z, 0, RAPIER.ColliderDesc.cylinder(height / 2, 0.8));
+      fixed(pier.position, new THREE.Quaternion(), RAPIER.ColliderDesc.cylinder(height / 2, 0.8));
     }
   }
 }
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const Z_AXIS = new THREE.Vector3(0, 0, 1);
 // Turns a capsule (which stands along y) to lie along the road (x).
 const LYING_DOWN = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
 
@@ -233,7 +253,8 @@ function ribbon(c, leftOffset, rightOffset, y, include) {
     const rz = c.tangents[i * 2];
     const l = leftOffset(i);
     const r = rightOffset(i);
-    out.push(x + rx * l, y, z + rz * l, x + rx * r, y, z + rz * r);
+    const h = y + (c.elevation?.[i] ?? 0);
+    out.push(x + rx * l, h, z + rz * l, x + rx * r, h, z + rz * r);
   });
 }
 
@@ -244,7 +265,8 @@ function wallRibbon(c, offset, height, include) {
     const o = offset(i);
     const px = x - c.tangents[i * 2 + 1] * o;
     const pz = z + c.tangents[i * 2] * o;
-    out.push(px, 0, pz, px, height, pz);
+    const base = c.elevation?.[i] ?? 0;
+    out.push(px, base, pz, px, base + height, pz);
   });
 }
 
@@ -290,14 +312,15 @@ function addLightPoles(scene, track) {
     for (let i = 0; i < c.points.length; i++) {
       if (c.distance[i] < next) continue;
       const spot = poseAt(c, i, c.width(i) / 2 + RIGHT_SHOULDER + 2);
-      if (!nearInterchange(spot)) spots.push(spot);
+      // Not out over a bridge's edge (they'd float), nor among the ramps.
+      if (c.points[i][3] !== 1 && !nearInterchange(spot)) spots.push(spot);
       next = c.distance[i] + POLE_EVERY;
     }
   }
   const poles = new THREE.InstancedMesh(poleGeo, mat, spots.length);
   poles.castShadow = true;
   const m = new THREE.Matrix4();
-  spots.forEach((p, i) => poles.setMatrixAt(i, m.makeTranslation(p.x, 0, p.z)));
+  spots.forEach((p, i) => poles.setMatrixAt(i, m.makeTranslation(p.x, p.y, p.z)));
   scene.add(poles);
 }
 

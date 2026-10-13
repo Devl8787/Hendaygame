@@ -138,7 +138,7 @@ export class Hazards {
       groundLayer(inner, LAYER.decal);
       outer.receiveShadow = inner.receiveShadow = true;
       mesh.add(outer, inner);
-      mesh.position.set(pose.x, 0.05, pose.z);
+      mesh.position.set(pose.x, pose.y + 0.05, pose.z);
       mesh.rotation.y = rand(0, Math.PI);
       this.scene.add(mesh);
       this.potholes.push({ x: pose.x, z: pose.z, r, mesh, cooldown: 0 });
@@ -227,14 +227,14 @@ export class Hazards {
     split.rotation.y = 0.08;
     const group = new THREE.Group();
     group.add(hump, split);
-    group.position.set(pose.x, 0, pose.z);
+    group.position.set(pose.x, pose.y, pose.z);
     group.quaternion.copy(heading);
     this.scene.add(group);
 
     // Yellow BIG BUMP sign on the right shoulder, 150 m before.
     const signPose = sampleAt(c, s - 150, c.width(0) / 2 + RIGHT_SHOULDER + 1);
     const sign = buildDiamondSign(['BIG', 'BUMP'], '#f2c200');
-    sign.position.set(signPose.x, 0, signPose.z);
+    sign.position.set(signPose.x, signPose.y, signPose.z);
     sign.quaternion.setFromAxisAngle(Y_AXIS, signPose.heading);
     this.scene.add(sign);
 
@@ -252,7 +252,11 @@ export class Hazards {
     let best = this.length / 2;
     let bestScore = Infinity;
     for (let s = 400; s < this.length - 400; s += 15) {
-      const nearBridge = [-200, -100, 0, 100, 200].some((d) => c.points[sampleAt(c, s + d).index][3] === 1);
+      // Not on or near a bridge, nor on the dip down to the river.
+      const nearBridge = [-200, -100, 0, 100, 200].some((d) => {
+        const i = sampleAt(c, s + d).index;
+        return c.points[i][3] === 1 || c.elevation[i] < -0.01;
+      });
       if (nearBridge) continue;
       let turning = 0;
       for (let d = -200; d < 150; d += 25) {
@@ -409,10 +413,13 @@ export class Hazards {
   }
 
   placeVehicle(v) {
-    const pose = sampleAt(v.c, v.s, laneCentre(v.c, v.laneNow));
+    const offset = laneCentre(v.c, v.laneNow);
+    const pose = sampleAt(v.c, v.s, offset);
     const heading = pose.heading + (v.dir < 0 ? Math.PI : 0);
-    v.quaternion.setFromAxisAngle(Y_AXIS, heading);
-    const y = v.kind === 'semi' ? v.size.halfHeight + 0.1 : CAR_SIZE.rideHeight;
+    // Nose up or down with the road (it dips toward the river).
+    const ahead = sampleAt(v.c, v.s + v.dir * 4, offset);
+    v.quaternion.setFromAxisAngle(Y_AXIS, heading).multiply(PITCH.setFromAxisAngle(Z_AXIS, Math.atan2(ahead.y - pose.y, 4)));
+    const y = pose.y + (v.kind === 'semi' ? v.size.halfHeight + 0.1 : CAR_SIZE.rideHeight);
     v.body.setNextKinematicTranslation({ x: pose.x, y, z: pose.z });
     v.body.setNextKinematicRotation(v.quaternion);
     v.mesh.position.set(pose.x, y, pose.z);
@@ -432,8 +439,9 @@ export class Hazards {
     // dodging to everyone else, swerving only at the last moment.
     if (ahead && v.wrongWay && this.hunting(v) && ahead.gap > 90) ahead = null;
     if (ahead) {
-      // Campers won't move over for anyone... except a head-on collision.
-      const stubborn = v.camper && !ahead.closing;
+      // Campers won't move over for anyone... except a head-on collision or
+      // a lane that's actually closed.
+      const stubborn = v.camper && !ahead.closing && !ahead.workZone;
       const settled = v.lane === v.laneNow || ahead.closing;
       const here = Math.round(v.laneNow);
       const options = stubborn ? [] : [here - 1, here + 1].filter((l) => l >= 0 && l <= 2);
@@ -452,6 +460,9 @@ export class Hazards {
     } else if (!v.camper && !v.wrongWay && v.lane < 2 && v.lane === v.laneNow && Math.random() < 0.06) {
       // Keep right except to pass.
       if (this.laneClear(v, v.lane + 1, 70)) v.lane += 1;
+    } else if (v.camper && v.lane > 0 && v.lane === v.laneNow && Math.random() < 0.06) {
+      // ...and the camper heads straight back to the left lane.
+      if (this.laneClear(v, v.lane - 1, 70)) v.lane -= 1;
     }
   }
 
@@ -487,7 +498,7 @@ export class Hazards {
         if (c.lane !== lane) continue;
         const start = v.dir > 0 ? c.s : c.s + c.length;
         const g = gap(this.length, v.s * v.dir, start * v.dir);
-        if (g < 60 && (!best || g < best.gap)) best = { gap: g, speed: 0 };
+        if (g < 60 && (!best || g < best.gap)) best = { gap: g, speed: 0, workZone: true };
       }
     }
     return best;
@@ -634,6 +645,8 @@ export class Hazards {
 }
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const Z_AXIS = new THREE.Vector3(0, 0, 1);
+const PITCH = new THREE.Quaternion();
 // Turns a cylinder (which stands along y) to run across the road (z).
 const ACROSS_ROAD = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
 

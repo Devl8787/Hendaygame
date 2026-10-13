@@ -59,8 +59,9 @@ grass that slows you to ~90 km/h.
 
 The North Saskatchewan river valley crosses the loop where the real Henday
 crosses it, in the south-west and north-east (the longest bridges in the
-OpenStreetMap data), with twin bridges on piers. Everywhere else is flat
-prairie, like the real thing.
+OpenStreetMap data). The road dips 6 m down into the valley onto twin bridges
+on piers and climbs back out. Everywhere else is flat prairie, like the real
+thing.
 
 Eight real interchanges (Whitemud, Yellowhead, Gateway, Manning and more) sit
 where they are on the real Henday, either as overpasses or with the Henday
