@@ -7,7 +7,8 @@ const SAMPLE_SPACING = 3; // metres between track points
 const GAP_BRIDGE = 150; // join ways whose ends are this close (OSM gaps)
 const MIN_CARRIAGEWAY = 5000; // ignore chains shorter than this (ramps, C-D lanes)
 
-export function osmToTrack(osm) {
+// crossRoads (optional): OSM ways for the roads that cross the Henday.
+export function osmToTrack(osm, crossRoads) {
   const ways = osm.elements.filter((e) => e.type === 'way' && e.geometry?.length > 1);
   if (ways.length === 0) throw new Error('No Henday ways found in the OSM data.');
 
@@ -49,7 +50,69 @@ export function osmToTrack(osm) {
     generated: new Date().toISOString(),
     origin,
     carriageways,
+    interchanges: crossRoads ? findInterchanges(carriageways[0], crossRoads, project) : [],
   };
+}
+
+const ROAD_CLASS = { motorway: 4, trunk: 3, primary: 2, secondary: 1 };
+
+// Where named roads cross the (first) carriageway, as a fraction of the way
+// round the loop. Crossings within 150 m merge into one interchange (e.g.
+// Gateway Blvd / Calgary Trail). `over` means the crossing road goes over
+// the Henday on a bridge; otherwise the Henday goes over it.
+function findInterchanges(carriageway, crossRoads, project) {
+  const pts = carriageway.points;
+  const n = pts.length;
+  const along = [0];
+  for (let i = 1; i < n; i++) along.push(along[i - 1] + dist(pts[i], pts[i - 1]));
+  const total = along[n - 1];
+
+  const hits = [];
+  for (const way of crossRoads.elements) {
+    if (way.type !== 'way' || !way.geometry || !way.tags?.name) continue;
+    const line = way.geometry.map(project);
+    for (let j = 0; j < line.length - 1; j++) {
+      for (let i = 0; i < n - 1; i++) {
+        const t = segmentHit(pts[i], pts[i + 1], line[j], line[j + 1]);
+        if (t === null) continue;
+        hits.push({
+          at: along[i] + t * (along[i + 1] - along[i]),
+          name: way.tags.name.replace(/ (NW|SW|NE|SE)$/, ''),
+          rank: ROAD_CLASS[way.tags.highway] ?? 0,
+          over: way.tags.bridge === 'yes',
+        });
+      }
+    }
+  }
+  hits.sort((a, b) => a.at - b.at);
+  const merged = [];
+  for (const h of hits) {
+    const last = merged[merged.length - 1];
+    if (last && h.at - last.at < 150) {
+      if (!last.names.includes(h.name)) last.names.push(h.name);
+      last.rank = Math.max(last.rank, h.rank);
+      last.over = last.over || h.over;
+    } else {
+      merged.push({ at: h.at, names: [h.name], rank: h.rank, over: h.over });
+    }
+  }
+  return merged.map((m) => ({
+    name: m.names.join(' / '),
+    fraction: Math.round((m.at / total) * 10000) / 10000,
+    rank: m.rank,
+    over: m.over,
+  }));
+}
+
+// Where segment a-b crosses segment c-d, as a fraction along a-b, or null.
+function segmentHit(a, b, c, d) {
+  const r = [b[0] - a[0], b[1] - a[1]];
+  const s = [d[0] - c[0], d[1] - c[1]];
+  const den = r[0] * s[1] - r[1] * s[0];
+  if (Math.abs(den) < 1e-9) return null;
+  const t = ((c[0] - a[0]) * s[1] - (c[1] - a[1]) * s[0]) / den;
+  const u = ((c[0] - a[0]) * r[1] - (c[1] - a[1]) * r[0]) / den;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1 ? t : null;
 }
 
 function centreOf(ways) {

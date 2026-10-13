@@ -1,7 +1,10 @@
 // Downloads Anthony Henday Drive from OpenStreetMap and writes the game track.
 //
 //   npm run fetch-henday              download from Overpass, then build the track
-//   npm run fetch-henday -- --offline rebuild the track from data/henday-osm.json
+//   npm run fetch-henday -- --offline rebuild the track from the saved data/osm files
+//
+// The game ships with the track already built (public/track/henday.json), so
+// you only need this to refresh it from the latest OpenStreetMap data.
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { osmToTrack } from './osm-to-track.mjs';
 
@@ -13,8 +16,9 @@ const OVERPASS_SERVERS = [
 ];
 const ROUNDS = 3;
 const WAIT_BETWEEN_ROUNDS = 20; // seconds
-const RAW_FILE = 'data/henday-osm.json';
-const TRACK_FILE = 'public/henday-track.json';
+const RAW_FILE = 'data/osm/henday.json';
+const CROSS_FILE = 'data/osm/crossroads.json';
+const TRACK_FILE = 'public/track/henday.json';
 
 // Main carriageways only (no on/off ramps), inside a box around Edmonton.
 const QUERY = `
@@ -26,16 +30,24 @@ const QUERY = `
 out geom;
 `;
 
-async function download() {
-  console.log('Downloading Anthony Henday Drive from OpenStreetMap (can take ~30 s)…');
+// Named major roads that touch the Henday: the interchanges.
+const CROSS_QUERY = `
+[out:json][timeout:180];
+way["highway"~"^(motorway|trunk)$"]["name"~"Anthony Henday"](53.35,-113.80,53.70,-113.20)->.h;
+way(around.h:25)["highway"~"^(motorway|trunk|primary|secondary)$"]["name"]["name"!~"Anthony Henday"];
+out geom;
+`;
+
+async function download(query, file, what) {
+  console.log(`Downloading ${what} from OpenStreetMap (can take ~30 s)…`);
   for (let round = 1; round <= ROUNDS; round++) {
     for (const url of OVERPASS_SERVERS) {
       const host = new URL(url).host;
-      const result = await tryServer(url);
+      const result = await tryServer(url, query);
       if (result.text) {
-        await mkdir('data', { recursive: true });
-        await writeFile(RAW_FILE, result.text);
-        console.log(`Saved raw OpenStreetMap data from ${host} to ${RAW_FILE}`);
+        await mkdir('data/osm', { recursive: true });
+        await writeFile(file, result.text);
+        console.log(`Saved raw OpenStreetMap data from ${host} to ${file}`);
         return JSON.parse(result.text);
       }
       console.log(`  ${host}: ${result.problem}`);
@@ -49,13 +61,13 @@ async function download() {
 }
 
 // Returns { text } on success, or { problem } describing what went wrong.
-async function tryServer(url) {
+async function tryServer(url, query) {
   let res;
   try {
     res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'HendayRacer/0.1' },
-      body: new URLSearchParams({ data: QUERY }),
+      body: new URLSearchParams({ data: query }),
       signal: AbortSignal.timeout(150_000),
     });
   } catch (err) {
@@ -81,14 +93,17 @@ function fail(message) {
 }
 
 const offline = process.argv.includes('--offline');
-const osm = offline ? JSON.parse(await readFile(RAW_FILE, 'utf8')) : await download();
+const load = async (query, file, what) => (offline ? JSON.parse(await readFile(file, 'utf8')) : download(query, file, what));
+const osm = await load(QUERY, RAW_FILE, 'Anthony Henday Drive');
+const crossRoads = await load(CROSS_QUERY, CROSS_FILE, 'the roads crossing it');
 console.log(`Got ${osm.elements.length} road pieces. Stitching them into carriageways…`);
 
-const track = osmToTrack(osm);
-await mkdir('public', { recursive: true });
+const track = osmToTrack(osm, crossRoads);
+await mkdir('public/track', { recursive: true });
 await writeFile(TRACK_FILE, JSON.stringify(track));
 
 for (const c of track.carriageways) {
   console.log(`  ${c.name}: ${(c.length / 1000).toFixed(1)} km, ${c.closed ? 'full loop' : 'NOT a closed loop'}`);
 }
+console.log(`  ${track.interchanges.length} interchanges`);
 console.log(`Wrote ${TRACK_FILE}. Start the game with: npm run dev`);

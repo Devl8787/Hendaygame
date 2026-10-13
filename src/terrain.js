@@ -18,15 +18,25 @@ const EDGE_FADE = 300; // the valley flattens out over the last stretch before t
 export class Terrain {
   // crossings: [{ x, z, tx, tz }] where the river crosses the loop (centre
   // line point and road direction). extent: half-size of the track in metres.
-  constructor(crossings, extent) {
+  // cuttings: [{ x, z, ux, uz }] where a road dips under the Henday (centre
+  // point and the crossing road's direction).
+  constructor(crossings, extent, cuttings = []) {
     this.river = riverLine(crossings);
+    this.cuttings = cuttings;
     this.half = Math.ceil((extent + MARGIN) / CELL) * CELL;
     this.buckets = bucketSegments(this.river, VALLEY_HALF_WIDTH + 10);
   }
 
-  // Ground height at (x, z): 0 on the prairie, down to -VALLEY_DEPTH in the valley.
+  // Ground height at (x, z): 0 on the prairie, lower in the river valley and
+  // in the cuttings that take crossing roads under the Henday.
   heightAt(x, z) {
     if (Math.abs(x) > this.half || Math.abs(z) > this.half) return 0;
+    let h = this.valleyHeight(x, z);
+    for (const c of this.cuttings) h = Math.min(h, cuttingHeight(c, x, z));
+    return h;
+  }
+
+  valleyHeight(x, z) {
     const d = this.distanceToRiver(x, z);
     if (d >= VALLEY_HALF_WIDTH) return 0;
     const t = THREE.MathUtils.clamp((d - FLOOR_HALF_WIDTH) / (VALLEY_HALF_WIDTH - FLOOR_HALF_WIDTH), 0, 1);
@@ -145,6 +155,30 @@ export class Terrain {
     );
     scene.add(water);
   }
+}
+
+// A cutting for a road passing under the Henday: a flat-bottomed trench
+// CUTTING_DEPTH deep where it crosses, sloping back up to ground level.
+export const CUTTING_DEPTH = 7.5;
+export const CUTTING_FLAT = 32; // metres either side of the Henday at full depth
+export const CUTTING_REACH = 140; // back at ground level this far out
+const CUTTING_FLOOR = 13; // half-width of the flat bottom (road plus verges)
+const CUTTING_SLOPE = 1.5; // horizontal metres per metre of depth on the side walls
+
+// How deep the cutting's road is, `u` metres along the crossing road.
+export function cuttingDepth(u) {
+  const t = THREE.MathUtils.clamp((Math.abs(u) - CUTTING_FLAT) / (CUTTING_REACH - CUTTING_FLAT), 0, 1);
+  return CUTTING_DEPTH * (1 - t * t * (3 - 2 * t));
+}
+
+function cuttingHeight({ x: cx, z: cz, ux, uz }, x, z) {
+  const dx = x - cx;
+  const dz = z - cz;
+  const u = dx * ux + dz * uz; // along the crossing road
+  const w = Math.abs(-dx * uz + dz * ux); // across it
+  if (Math.abs(u) > CUTTING_REACH || w > CUTTING_FLOOR + CUTTING_SLOPE * CUTTING_DEPTH) return 0;
+  const depth = cuttingDepth(u);
+  return Math.min(0, -depth + Math.max(0, w - CUTTING_FLOOR) / CUTTING_SLOPE);
 }
 
 // A smooth river line: in at the south-west crossing (square to the road),

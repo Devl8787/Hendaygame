@@ -14,14 +14,17 @@ const RACE_LANES = 3;
 const MEDIAN_WIDTH = 12;
 const SPACING = 3;
 
+// The track ships with the game (built by `npm run fetch-henday`).
+const TRACK_URL = `${import.meta.env?.BASE_URL ?? '/'}track/henday.json`;
+
 export async function loadTrack() {
   try {
-    const res = await fetch(`${import.meta.env?.BASE_URL ?? '/'}henday-track.json`);
+    const res = await fetch(TRACK_URL);
     // Vite's dev server answers missing files with index.html, so check the type too.
     if (res.ok && res.headers.get('content-type')?.includes('json')) {
       const track = await res.json();
       const full = new URLSearchParams(window.location.search).has('full');
-      return prepare(full ? track : compress(track, RACE_LAP_LENGTH), false);
+      return prepare(full ? { ...track, interchanges: [] } : compress(track, RACE_LAP_LENGTH), false);
     }
   } catch {
     // Fall through to the test strip.
@@ -47,6 +50,7 @@ function compress(track, lapLength) {
   const along = offsetLoop(centre, offset);
   const against = offsetLoop(centre, -offset).reverse();
   const toPoints = (line) => line.map(([x, z]) => [x, z, RACE_LANES, 0]);
+  const river = riverCrossings(source, centre);
 
   return {
     ...track,
@@ -54,8 +58,46 @@ function compress(track, lapLength) {
       { name: 'Clockwise', closed: true, length: Math.round(loopLength(along)), points: toPoints(along) },
       { name: 'Counter-clockwise', closed: true, length: Math.round(loopLength(against)), points: toPoints(against) },
     ],
-    river: riverCrossings(source, centre),
+    river,
+    interchanges: pickInterchanges(track.interchanges ?? [], centre, river),
   };
+}
+
+// The shrunk loop only has room for a handful of the Henday's ~35
+// interchanges: the famous ones first, spaced out so their ramps don't
+// overlap, and clear of the start line and the river bridges.
+const FAMOUS = ['Whitemud', 'Yellowhead', 'Gateway', 'Stony Plain', 'St. Albert', 'Manning', 'Sherwood Park', 'Baseline'];
+const INTERCHANGE_SPACING = 320; // metres between interchanges on the shrunk loop
+const CLEAR_OF_START = 300;
+const CLEAR_OF_RIVER = 180;
+function pickInterchanges(all, centre, river) {
+  const n = centre.length;
+  const length = n * SPACING;
+  const fame = (name) => {
+    const i = FAMOUS.findIndex((f) => name.includes(f));
+    return i < 0 ? FAMOUS.length : i;
+  };
+  const candidates = [...all].sort((a, b) => fame(a.name) - fame(b.name) || b.rank - a.rank);
+  const loopGap = (a, b) => {
+    const d = Math.abs(a - b) % length;
+    return Math.min(d, length - d);
+  };
+  const picked = [];
+  for (const c of candidates) {
+    const at = c.fraction * length;
+    const [x, z] = centre[Math.round(at / SPACING) % n];
+    if (loopGap(at, 0) < CLEAR_OF_START) continue;
+    if (river.some((r) => Math.hypot(r.x - x, r.z - z) < CLEAR_OF_RIVER)) continue;
+    if (picked.some((p) => loopGap(p.at, at) < INTERCHANGE_SPACING)) continue;
+    picked.push({ ...c, at });
+  }
+  return picked.map((c) => {
+    const i = Math.round(c.at / SPACING) % n;
+    const prev = centre[(i - 1 + n) % n];
+    const next = centre[(i + 1) % n];
+    const len = Math.hypot(next[0] - prev[0], next[1] - prev[1]) || 1;
+    return { name: c.name, over: c.over, x: centre[i][0], z: centre[i][1], tx: (next[0] - prev[0]) / len, tz: (next[1] - prev[1]) / len };
+  });
 }
 
 // Where the North Saskatchewan crosses the loop, on the shrunk centre line.

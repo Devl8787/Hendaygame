@@ -13,7 +13,7 @@ echo Installing anything new...
 call npm install --no-audit --no-fund --loglevel=error
 if errorlevel 1 goto npm_failed
 
-if exist public\henday-track.json goto start
+if exist public\track\henday.json goto start
 echo.
 echo Downloading the Anthony Henday from OpenStreetMap - one time only...
 call npm run fetch-henday

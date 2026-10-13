@@ -64,7 +64,10 @@ function addGround(scene, world, track) {
     for (const [x, z] of c.points) extent = Math.max(extent, Math.abs(x), Math.abs(z));
   }
   if (track.river) {
-    const terrain = new Terrain(track.river, extent);
+    // Roads passing under the Henday get a cutting; the crossing road runs
+    // across the Henday (along its right-hand normal).
+    const cuttings = (track.interchanges ?? []).filter((i) => !i.over).map((i) => ({ x: i.x, z: i.z, ux: -i.tz, uz: i.tx }));
+    const terrain = new Terrain(track.river, extent, cuttings);
     terrain.build(scene, world);
     return terrain;
   }
@@ -275,7 +278,9 @@ function stripGeometry(c, include, pushPair) {
   return geo;
 }
 
+// Light poles, kept clear of the interchanges (ramps and embankments).
 function addLightPoles(scene, track) {
+  const nearInterchange = (p) => (track.interchanges ?? []).some((i) => Math.hypot(i.x - p.x, i.z - p.z) < 230);
   const poleGeo = new THREE.CylinderGeometry(0.12, 0.15, 10, 8);
   poleGeo.translate(0, 5, 0);
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a8f96, metalness: 0.6, roughness: 0.4 });
@@ -284,7 +289,8 @@ function addLightPoles(scene, track) {
     let next = 0;
     for (let i = 0; i < c.points.length; i++) {
       if (c.distance[i] < next) continue;
-      spots.push(poseAt(c, i, c.width(i) / 2 + RIGHT_SHOULDER + 2));
+      const spot = poseAt(c, i, c.width(i) / 2 + RIGHT_SHOULDER + 2);
+      if (!nearInterchange(spot)) spots.push(spot);
       next = c.distance[i] + POLE_EVERY;
     }
   }

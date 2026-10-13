@@ -19,22 +19,22 @@ npm run dev
 
 Then open http://localhost:5173.
 
-### Load the real Anthony Henday
+### The map
 
-Out of the box you drive a straight 2 km test strip. To drive the real road,
-download it from OpenStreetMap once (needs internet, takes about 30 seconds):
+The Anthony Henday comes with the game (`public/track/henday.json`), built
+from OpenStreetMap: the road, the river bridges and the roads that cross it.
+To rebuild it from the latest OpenStreetMap data (needs internet, ~1 minute):
 
 ```bash
 npm run fetch-henday
 ```
 
-This saves the raw map data to `data/henday-osm.json` and builds the track
-into `public/henday-track.json`. Refresh the page and you're racing the Henday.
+The raw downloads are kept in `data/osm/`, and
+`npm run fetch-henday -- --offline` rebuilds the track from them.
 
 The real loop is ~78 km (a 47-minute lap), so the game shrinks it to a ~4 km
 loop with the same shape, about a 1.5-minute lap at up to 200 km/h. Lanes stay
-full size. To drive the real-length loop, open http://localhost:5173/?full. To rebuild the track from the saved data
-without downloading again: `npm run fetch-henday -- --offline`.
+full size. To drive the real-length loop, open http://localhost:5173/?full.
 
 Road data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
 
@@ -62,6 +62,11 @@ crosses it, in the south-west and north-east (the longest bridges in the
 OpenStreetMap data), with twin bridges on piers. Everywhere else is flat
 prairie, like the real thing.
 
+Eight real interchanges (Whitemud, Yellowhead, Gateway, Manning and more) sit
+where they are on the real Henday, either as overpasses or with the Henday
+bridging over the crossing road, just like the real ones. It's a race, so every
+ramp is barricaded: EXIT CLOSED.
+
 ## How it fits together
 
 | File | What it does |
@@ -73,9 +78,10 @@ prairie, like the real thing.
 | `src/race.js` | Countdown, laps, checkpoints, lap timer, best lap, wrong-way warning. |
 | `src/hazards.js` | Traffic and its lane-changing AI, wrong-way drivers, potholes, moving lane closures, grass. |
 | `src/construction.js` | Work zones: sign, arrow board, cones, barriers, excavator and crew. |
-| `src/terrain.js` | The river valley: ground mesh, physics heightfield and water. |
+| `src/terrain.js` | The river valley and road cuttings: ground mesh, physics heightfield and water. |
+| `src/interchange.js` | Interchanges: overpasses or underpasses, crossing roads and their traffic, closed ramps, exit signs. |
 | `scripts/fetch-henday.mjs` | Downloads the Henday from OpenStreetMap's Overpass API. |
-| `scripts/osm-to-track.mjs` | Stitches the OpenStreetMap road pieces into one loop per direction, in metres. |
+| `scripts/osm-to-track.mjs` | Stitches the OpenStreetMap road pieces into one loop per direction, in metres, and finds the interchanges. |
 | `src/car.js` | The car: a Rapier ray-cast vehicle (box chassis + 4 spring wheels), engine, brakes, steering, drag. |
 | `src/input.js` | Keyboard controls. |
 
@@ -88,7 +94,8 @@ then copied to its body's position and rotation.
 2. ✅ Import the real Henday route from OpenStreetMap
 3. ✅ Laps, checkpoints and a timer (on a ~4 km scaled-down Henday)
 4. ✅ Hazards: potholes, road closures, traffic, wrong-way drivers
-5. ✅ Hills: the south-west and north-east river valleys, frost heaves (overpasses still to come)
-6. Music and sound
-7. Graphics pass: textures, lighting, real models (Blender / free assets)
-8. Optional Google Photorealistic 3D Tiles for scenery
+5. ✅ Hills: the south-west and north-east river valleys, a giant frost heave
+6. ✅ Interchanges: overpasses, underpasses and closed exits
+7. Music and sound
+8. Graphics pass: textures, lighting, real models (Blender / free assets)
+9. Optional Google Photorealistic 3D Tiles for scenery

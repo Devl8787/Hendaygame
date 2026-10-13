@@ -6,6 +6,7 @@ import { Car } from './car.js';
 import { Minimap } from './minimap.js';
 import { Race } from './race.js';
 import { Hazards } from './hazards.js';
+import { buildInterchanges } from './interchange.js';
 import { readInput, onPress } from './input.js';
 
 const FIXED_DT = 1 / 60;
@@ -25,6 +26,7 @@ const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerH
 const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
 world.timestep = FIXED_DT;
 const { terrain } = createWorld(scene, world, track);
+const interchanges = buildInterchanges(scene, world, track, terrain);
 const start = track.carriageways[0];
 // Start a few metres behind the line, in the middle lane.
 const startIndex = start.closed ? start.points.length - 3 : 0;
@@ -143,6 +145,7 @@ renderer.setAnimationLoop(() => {
 
   car.syncMeshes();
   checkUpsideDown(frameDt);
+  interchanges.update(frameDt);
   if (race) {
     carForward.set(1, 0, 0).applyQuaternion(car.mesh.quaternion);
     race.update(frameDt, car.mesh.position, carForward, car.speed);

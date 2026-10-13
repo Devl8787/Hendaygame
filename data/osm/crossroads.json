@@ -1,0 +1,3089 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-10-13T20:55:06Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "way",
+  "id": 22916059,
+  "bounds": {
+    "minlat": 53.5226046,
+    "minlon": -113.6600355,
+    "maxlat": 53.5228880,
+    "maxlon": -113.6583801
+  },
+  "nodes": [
+    246714502,
+    240216015
+  ],
+  "geometry": [
+    { "lat": 53.5228880, "lon": -113.6600355 },
+    { "lat": 53.5226046, "lon": -113.6583801 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "87 Avenue NW",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "width": "7.4"
+  }
+},
+{
+  "type": "way",
+  "id": 22916411,
+  "bounds": {
+    "minlat": 53.4368797,
+    "minlon": -113.4669424,
+    "maxlat": 53.4379270,
+    "maxlon": -113.4667742
+  },
+  "nodes": [
+    246724706,
+    10027645657,
+    246724707
+  ],
+  "geometry": [
+    { "lat": 53.4379270, "lon": -113.4667742 },
+    { "lat": 53.4377726, "lon": -113.4667926 },
+    { "lat": 53.4368797, "lon": -113.4669424 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "91 Street NW",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 22916413,
+  "bounds": {
+    "minlat": 53.4368698,
+    "minlon": -113.4667564,
+    "maxlat": 53.4379262,
+    "maxlon": -113.4666189
+  },
+  "nodes": [
+    246724708,
+    246724709
+  ],
+  "geometry": [
+    { "lat": 53.4368698, "lon": -113.4667564 },
+    { "lat": 53.4379262, "lon": -113.4666189 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "91 Street NW",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 22949369,
+  "bounds": {
+    "minlat": 53.4439866,
+    "minlon": -113.6008691,
+    "maxlat": 53.4443791,
+    "maxlon": -113.5995551
+  },
+  "nodes": [
+    247269576,
+    4583373390,
+    247269575
+  ],
+  "geometry": [
+    { "lat": 53.4439866, "lon": -113.6008691 },
+    { "lat": 53.4441952, "lon": -113.6001635 },
+    { "lat": 53.4443791, "lon": -113.5995551 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "expressway": "yes",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "4",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "70",
+    "maxweight:signed": "no",
+    "name": "Terwillegar Drive NW",
+    "oneway": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 25457132,
+  "bounds": {
+    "minlat": 53.4351401,
+    "minlon": -113.3942831,
+    "maxlat": 53.4359298,
+    "maxlon": -113.3942624
+  },
+  "nodes": [
+    277413467,
+    277413468
+  ],
+  "geometry": [
+    { "lat": 53.4359298, "lon": -113.3942831 },
+    { "lat": 53.4351401, "lon": -113.3942624 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "34 Street SW",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 25457169,
+  "bounds": {
+    "minlat": 53.4352090,
+    "minlon": -113.4415698,
+    "maxlat": 53.4360634,
+    "maxlon": -113.4413100
+  },
+  "nodes": [
+    277413407,
+    277413408
+  ],
+  "geometry": [
+    { "lat": 53.4360634, "lon": -113.4413100 },
+    { "lat": 53.4352090, "lon": -113.4415698 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "66 Street NW",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 25500106,
+  "bounds": {
+    "minlat": 53.4342214,
+    "minlon": -113.5194551,
+    "maxlat": 53.4351856,
+    "maxlon": -113.5194094
+  },
+  "nodes": [
+    246714167,
+    1503281705,
+    1503281665,
+    246714166
+  ],
+  "geometry": [
+    { "lat": 53.4342214, "lon": -113.5194094 },
+    { "lat": 53.4346292, "lon": -113.5194551 },
+    { "lat": 53.4348929, "lon": -113.5194549 },
+    { "lat": 53.4351856, "lon": -113.5194299 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "expressway": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "111 Street NW",
+    "oneway": "yes",
+    "sidewalk": "separate",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 25500123,
+  "bounds": {
+    "minlat": 53.4342297,
+    "minlon": -113.5196600,
+    "maxlat": 53.4351933,
+    "maxlon": -113.5196138
+  },
+  "nodes": [
+    277849805,
+    1503281521,
+    1503281634,
+    277849807
+  ],
+  "geometry": [
+    { "lat": 53.4351933, "lon": -113.5196194 },
+    { "lat": 53.4348950, "lon": -113.5196600 },
+    { "lat": 53.4346252, "lon": -113.5196554 },
+    { "lat": 53.4342297, "lon": -113.5196138 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "expressway": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "111 Street NW",
+    "oneway": "yes",
+    "sidewalk": "no",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 25957005,
+  "bounds": {
+    "minlat": 53.4350301,
+    "minlon": -113.4180938,
+    "maxlat": 53.4361639,
+    "maxlon": -113.4180813
+  },
+  "nodes": [
+    283176043,
+    283175991
+  ],
+  "geometry": [
+    { "lat": 53.4361639, "lon": -113.4180938 },
+    { "lat": 53.4350301, "lon": -113.4180813 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "50 Street NW",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 25961243,
+  "bounds": {
+    "minlat": 53.4350304,
+    "minlon": -113.4179381,
+    "maxlat": 53.4361629,
+    "maxlon": -113.4179108
+  },
+  "nodes": [
+    225211626,
+    225211625
+  ],
+  "geometry": [
+    { "lat": 53.4350304, "lon": -113.4179108 },
+    { "lat": 53.4361629, "lon": -113.4179381 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "50 Street NW",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 34572698,
+  "bounds": {
+    "minlat": 53.5125835,
+    "minlon": -113.3451508,
+    "maxlat": 53.5129443,
+    "maxlon": -113.3430077
+  },
+  "nodes": [
+    369905297,
+    369896112
+  ],
+  "geometry": [
+    { "lat": 53.5129443, "lon": -113.3451508 },
+    { "lat": 53.5125835, "lon": -113.3430077 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "highway": "motorway",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "80",
+    "name": "Sherwood Park Freeway",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "unsigned_ref": "100"
+  }
+},
+{
+  "type": "way",
+  "id": 37693617,
+  "bounds": {
+    "minlat": 53.4370237,
+    "minlon": -113.4908124,
+    "maxlat": 53.4380868,
+    "maxlon": -113.4904937
+  },
+  "nodes": [
+    246725526,
+    5785446512,
+    1503281676,
+    1503281594,
+    284140796,
+    5785446516,
+    5785446521,
+    1503281522
+  ],
+  "geometry": [
+    { "lat": 53.4380868, "lon": -113.4908124 },
+    { "lat": 53.4379491, "lon": -113.4907498 },
+    { "lat": 53.4378699, "lon": -113.4907163 },
+    { "lat": 53.4377339, "lon": -113.4906653 },
+    { "lat": 53.4375630, "lon": -113.4906102 },
+    { "lat": 53.4374076, "lon": -113.4905722 },
+    { "lat": 53.4372223, "lon": -113.4905300 },
+    { "lat": 53.4370237, "lon": -113.4904937 }
+  ],
+  "tags": {
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "lanes": "3",
+    "lit": "yes",
+    "maxheight": "5.9",
+    "maxspeed": "90",
+    "name": "Calgary Trail SW",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "ref": "2",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 44486885,
+  "bounds": {
+    "minlat": 53.4440788,
+    "minlon": -113.6009407,
+    "maxlat": 53.4444694,
+    "maxlon": -113.5996171
+  },
+  "nodes": [
+    565302093,
+    565302146
+  ],
+  "geometry": [
+    { "lat": 53.4444694, "lon": -113.5996171 },
+    { "lat": 53.4440788, "lon": -113.6009407 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "expressway": "yes",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "4",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "70",
+    "maxweight:signed": "no",
+    "name": "Terwillegar Drive NW",
+    "oneway": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 57846732,
+  "bounds": {
+    "minlat": 53.6459154,
+    "minlon": -113.4393655,
+    "maxlat": 53.6470604,
+    "maxlon": -113.4386111
+  },
+  "nodes": [
+    717663056,
+    717663051
+  ],
+  "geometry": [
+    { "lat": 53.6470604, "lon": -113.4386111 },
+    { "lat": 53.6459154, "lon": -113.4393655 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "66 Street NW",
+    "oneway": "yes",
+    "source": "AB Transportation",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 57846769,
+  "bounds": {
+    "minlat": 53.6458781,
+    "minlon": -113.4391798,
+    "maxlat": 53.6470227,
+    "maxlon": -113.4384163
+  },
+  "nodes": [
+    717663309,
+    717663286
+  ],
+  "geometry": [
+    { "lat": 53.6458781, "lon": -113.4391798 },
+    { "lat": 53.6470227, "lon": -113.4384163 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "66 Street NW",
+    "oneway": "yes",
+    "source": "AB Transportation",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 57973797,
+  "bounds": {
+    "minlat": 53.6386235,
+    "minlon": -113.5456194,
+    "maxlat": 53.6394490,
+    "maxlon": -113.5449197
+  },
+  "nodes": [
+    719381686,
+    719381696
+  ],
+  "geometry": [
+    { "lat": 53.6386235, "lon": -113.5449197 },
+    { "lat": 53.6394490, "lon": -113.5456194 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "127 Street NW",
+    "oneway": "yes",
+    "source": "GPS trace"
+  }
+},
+{
+  "type": "way",
+  "id": 57974226,
+  "bounds": {
+    "minlat": 53.6385846,
+    "minlon": -113.5457940,
+    "maxlat": 53.6394428,
+    "maxlon": -113.5450626
+  },
+  "nodes": [
+    719383167,
+    719383081
+  ],
+  "geometry": [
+    { "lat": 53.6394428, "lon": -113.5457940 },
+    { "lat": 53.6385846, "lon": -113.5450626 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "127 Street NW",
+    "oneway": "yes",
+    "source": "GPS trace"
+  }
+},
+{
+  "type": "way",
+  "id": 60064623,
+  "bounds": {
+    "minlat": 53.5718655,
+    "minlon": -113.6779575,
+    "maxlat": 53.5736534,
+    "maxlon": -113.6607807
+  },
+  "nodes": [
+    766140797,
+    766112215,
+    10017483100,
+    766112243,
+    10017483099,
+    2784753721,
+    766112244,
+    1814158302,
+    1814158401,
+    2784753732,
+    766112246,
+    1814158419,
+    1814158329,
+    766112274,
+    2836936363
+  ],
+  "geometry": [
+    { "lat": 53.5718655, "lon": -113.6779575 },
+    { "lat": 53.5728955, "lon": -113.6725354 },
+    { "lat": 53.5730976, "lon": -113.6713234 },
+    { "lat": 53.5732668, "lon": -113.6701225 },
+    { "lat": 53.5733883, "lon": -113.6690515 },
+    { "lat": 53.5734896, "lon": -113.6679579 },
+    { "lat": 53.5735351, "lon": -113.6673645 },
+    { "lat": 53.5735684, "lon": -113.6668614 },
+    { "lat": 53.5735956, "lon": -113.6663734 },
+    { "lat": 53.5736233, "lon": -113.6657696 },
+    { "lat": 53.5736358, "lon": -113.6653795 },
+    { "lat": 53.5736513, "lon": -113.6646003 },
+    { "lat": 53.5736534, "lon": -113.6640214 },
+    { "lat": 53.5736470, "lon": -113.6628629 },
+    { "lat": 53.5736219, "lon": -113.6607807 }
+  ],
+  "tags": {
+    "NHS": "yes",
+    "addr:housenumber:first:right": "19707",
+    "addr:housenumber:last:right": "21459",
+    "alt_name": "Yellowhead Highway",
+    "alt_name:en": "Yellowhead Highway",
+    "alt_name:fr": "Route Yellowhead",
+    "attribution": "GeoBase®",
+    "geobase:acquisitionTechnique": "GPS",
+    "geobase:roadsegmentid": "352657;66797;115938",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "100",
+    "name": "Yellowhead Trail NW",
+    "name:etymology:wikidata": "Q22647683",
+    "nat_name": "Trans-Canada Highway",
+    "nat_name:en": "Trans-Canada Highway",
+    "nat_name:fr": "Route Transcanadienne",
+    "oneway": "yes",
+    "ref": "16",
+    "source": "NRN - Alberta V7.0",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 62049763,
+  "bounds": {
+    "minlat": 53.4830089,
+    "minlon": -113.3436909,
+    "maxlat": 53.4830128,
+    "maxlon": -113.3417668
+  },
+  "nodes": [
+    773404978,
+    773404836
+  ],
+  "geometry": [
+    { "lat": 53.4830089, "lon": -113.3417668 },
+    { "lat": 53.4830128, "lon": -113.3436909 }
+  ],
+  "tags": {
+    "attribution": "GeoBase®",
+    "bridge": "yes",
+    "geobase:acquisitionTechnique": "GPS",
+    "highway": "motorway",
+    "lanes": "3",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "80",
+    "name": "Whitemud Drive",
+    "old_ref": "14",
+    "oneway": "yes",
+    "source": "NRN - Alberta V7.0",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 62049895,
+  "bounds": {
+    "minlat": 53.4827662,
+    "minlon": -113.3437434,
+    "maxlat": 53.4827754,
+    "maxlon": -113.3417497
+  },
+  "nodes": [
+    773416322,
+    773418779
+  ],
+  "geometry": [
+    { "lat": 53.4827754, "lon": -113.3437434 },
+    { "lat": 53.4827662, "lon": -113.3417497 }
+  ],
+  "tags": {
+    "attribution": "GeoBase®",
+    "bridge": "yes",
+    "geobase:acquisitionTechnique": "GPS",
+    "hazard": "roadworks",
+    "highway": "motorway",
+    "lanes": "1",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "80",
+    "name": "Whitemud Drive",
+    "old_ref": "14",
+    "oneway": "yes",
+    "source": "NRN - Alberta V7.0",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 64972380,
+  "bounds": {
+    "minlat": 53.5699341,
+    "minlon": -113.3542841,
+    "maxlat": 53.5702341,
+    "maxlon": -113.3435732
+  },
+  "nodes": [
+    1194814449,
+    4544537012,
+    4544537011,
+    4465212042,
+    765095855,
+    764731121,
+    764731119,
+    4544532165,
+    764731117
+  ],
+  "geometry": [
+    { "lat": 53.5702341, "lon": -113.3435732 },
+    { "lat": 53.5701999, "lon": -113.3463523 },
+    { "lat": 53.5701912, "lon": -113.3468780 },
+    { "lat": 53.5701750, "lon": -113.3474691 },
+    { "lat": 53.5701465, "lon": -113.3484047 },
+    { "lat": 53.5701140, "lon": -113.3493577 },
+    { "lat": 53.5699736, "lon": -113.3525146 },
+    { "lat": 53.5699341, "lon": -113.3534776 },
+    { "lat": 53.5699389, "lon": -113.3542841 }
+  ],
+  "tags": {
+    "NHS": "yes",
+    "attribution": "GeoBase®",
+    "geobase:acquisitionTechnique": "GPS",
+    "highway": "motorway",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "100",
+    "name": "Yellowhead Highway",
+    "name:en": "Yellowhead Highway",
+    "name:etymology:wikidata": "Q22647683",
+    "name:fr": "Route Yellowhead",
+    "nat_name": "Trans-Canada Highway",
+    "nat_name:en": "Trans-Canada Highway",
+    "nat_name:fr": "Route Transcanadienne",
+    "official_name": "Yellowhead Trail",
+    "oneway": "yes",
+    "ref": "16",
+    "source": "NRN - Alberta V7.0"
+  }
+},
+{
+  "type": "way",
+  "id": 82659882,
+  "bounds": {
+    "minlat": 53.6171043,
+    "minlon": -113.3601765,
+    "maxlat": 53.6173285,
+    "maxlon": -113.3582766
+  },
+  "nodes": [
+    962037940,
+    962038127
+  ],
+  "geometry": [
+    { "lat": 53.6171043, "lon": -113.3601765 },
+    { "lat": 53.6173285, "lon": -113.3582766 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "153 Avenue NW",
+    "oneway": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 82659888,
+  "bounds": {
+    "minlat": 53.6347256,
+    "minlon": -113.3939063,
+    "maxlat": 53.6356901,
+    "maxlon": -113.3935316
+  },
+  "nodes": [
+    962037899,
+    962037752
+  ],
+  "geometry": [
+    { "lat": 53.6347256, "lon": -113.3939063 },
+    { "lat": 53.6356901, "lon": -113.3935316 }
+  ],
+  "tags": {
+    "NHS": "yes",
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "trunk",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "70",
+    "name": "Manning Drive NW",
+    "name:etymology:wikidata": "Q1356461",
+    "oneway": "yes",
+    "ref": "15",
+    "surface": "asphalt",
+    "width": "7.4"
+  }
+},
+{
+  "type": "way",
+  "id": 82659911,
+  "bounds": {
+    "minlat": 53.6348315,
+    "minlon": -113.3943402,
+    "maxlat": 53.6357950,
+    "maxlon": -113.3939680
+  },
+  "nodes": [
+    962038184,
+    962037995
+  ],
+  "geometry": [
+    { "lat": 53.6357950, "lon": -113.3939680 },
+    { "lat": 53.6348315, "lon": -113.3943402 }
+  ],
+  "tags": {
+    "NHS": "yes",
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "trunk",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "70",
+    "name": "Manning Drive NW",
+    "name:etymology:wikidata": "Q1356461",
+    "oneway": "yes",
+    "ref": "15",
+    "shoulder": "both",
+    "surface": "asphalt",
+    "width": "7.4"
+  }
+},
+{
+  "type": "way",
+  "id": 91963727,
+  "bounds": {
+    "minlat": 53.4306643,
+    "minlon": -113.5828505,
+    "maxlat": 53.4309795,
+    "maxlon": -113.5822767
+  },
+  "nodes": [
+    1068445611,
+    4278976393
+  ],
+  "geometry": [
+    { "lat": 53.4309795, "lon": -113.5822767 },
+    { "lat": 53.4306643, "lon": -113.5828505 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Rabbit Hill Road NW",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "surface": "asphalt",
+    "width": "12"
+  }
+},
+{
+  "type": "way",
+  "id": 91972084,
+  "bounds": {
+    "minlat": 53.4663762,
+    "minlon": -113.6317111,
+    "maxlat": 53.4669864,
+    "maxlon": -113.6302486
+  },
+  "nodes": [
+    7134744722,
+    7134744724,
+    1068497479
+  ],
+  "geometry": [
+    { "lat": 53.4663762, "lon": -113.6317111 },
+    { "lat": 53.4665530, "lon": -113.6313397 },
+    { "lat": 53.4669864, "lon": -113.6302486 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "3",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "184 Street NW",
+    "oneway": "yes",
+    "placement": "left_of:3",
+    "source": "AB Transportation",
+    "source:maxspeed": "sign",
+    "turn:lanes": "left|through|through",
+    "website": "https://www.transportation.alberta.ca/Content/docType353/production/DisplayBoardsMar25-10.pdf"
+  }
+},
+{
+  "type": "way",
+  "id": 91972086,
+  "bounds": {
+    "minlat": 53.4666057,
+    "minlon": -113.6315703,
+    "maxlat": 53.4670470,
+    "maxlon": -113.6304769
+  },
+  "nodes": [
+    1068497446,
+    7134744721,
+    7134744723
+  ],
+  "geometry": [
+    { "lat": 53.4670470, "lon": -113.6304769 },
+    { "lat": 53.4667481, "lon": -113.6312377 },
+    { "lat": 53.4666057, "lon": -113.6315703 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "184 Street NW",
+    "oneway": "yes",
+    "source": "AB Transportation",
+    "source:maxspeed": "sign",
+    "website": "https://www.transportation.alberta.ca/Content/docType353/production/DisplayBoardsMar25-10.pdf"
+  }
+},
+{
+  "type": "way",
+  "id": 103485492,
+  "bounds": {
+    "minlat": 53.5872942,
+    "minlon": -113.3459686,
+    "maxlat": 53.5874651,
+    "maxlon": -113.3445488
+  },
+  "nodes": [
+    1194814610,
+    1194814586
+  ],
+  "geometry": [
+    { "lat": 53.5872942, "lon": -113.3445488 },
+    { "lat": 53.5874651, "lon": -113.3459686 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "highway": "secondary",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "130 Avenue NW",
+    "oneway": "yes",
+    "source": "AB Transportation",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 103485493,
+  "bounds": {
+    "minlat": 53.5871630,
+    "minlon": -113.3459517,
+    "maxlat": 53.5873373,
+    "maxlon": -113.3445424
+  },
+  "nodes": [
+    1194808075,
+    1194808063
+  ],
+  "geometry": [
+    { "lat": 53.5873373, "lon": -113.3459517 },
+    { "lat": 53.5871630, "lon": -113.3445424 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "highway": "secondary",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "130 Avenue NW",
+    "oneway": "yes",
+    "source": "AB Transportation",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 103689991,
+  "bounds": {
+    "minlat": 53.6167830,
+    "minlon": -113.6003663,
+    "maxlat": 53.6169507,
+    "maxlon": -113.6000517
+  },
+  "nodes": [
+    1197119891,
+    9454142522
+  ],
+  "geometry": [
+    { "lat": 53.6167830, "lon": -113.6000517 },
+    { "lat": 53.6169507, "lon": -113.6003663 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "4",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "St. Albert Trail NW",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "ref": "2",
+    "turn:lanes": "through|through|through|slight_right"
+  }
+},
+{
+  "type": "way",
+  "id": 103689998,
+  "bounds": {
+    "minlat": 53.6465178,
+    "minlon": -113.4674341,
+    "maxlat": 53.6473656,
+    "maxlon": -113.4674308
+  },
+  "nodes": [
+    1197119868,
+    1197119984
+  ],
+  "geometry": [
+    { "lat": 53.6465178, "lon": -113.4674341 },
+    { "lat": 53.6473656, "lon": -113.4674308 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "82 Street NW"
+  }
+},
+{
+  "type": "way",
+  "id": 103690008,
+  "bounds": {
+    "minlat": 53.6464716,
+    "minlon": -113.4912999,
+    "maxlat": 53.6474237,
+    "maxlon": -113.4912993
+  },
+  "nodes": [
+    1197119833,
+    778570488
+  ],
+  "geometry": [
+    { "lat": 53.6474237, "lon": -113.4912999 },
+    { "lat": 53.6464716, "lon": -113.4912993 }
+  ],
+  "tags": {
+    "attribution": "GeoBase®",
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "geobase:acquisitionTechnique": "GPS",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "80",
+    "name": "97 Street NW",
+    "official_name": "Canadian Forces Trail",
+    "old_name": "Namayo Avenue",
+    "oneway": "yes",
+    "ref": "28",
+    "source": "AB Transportation"
+  }
+},
+{
+  "type": "way",
+  "id": 103690022,
+  "bounds": {
+    "minlat": 53.6170392,
+    "minlon": -113.6013057,
+    "maxlat": 53.6172880,
+    "maxlon": -113.6008453
+  },
+  "nodes": [
+    1197120211,
+    1661273610
+  ],
+  "geometry": [
+    { "lat": 53.6172880, "lon": -113.6013057 },
+    { "lat": 53.6170392, "lon": -113.6008453 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "4",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "Mark Messier Trail NW",
+    "name:etymology:wikidata": "Q319247",
+    "oneway": "yes",
+    "ref": "2",
+    "turn:lanes": "through|through|through|slight_right"
+  }
+},
+{
+  "type": "way",
+  "id": 103690023,
+  "bounds": {
+    "minlat": 53.6464531,
+    "minlon": -113.4911499,
+    "maxlat": 53.6474196,
+    "maxlon": -113.4911485
+  },
+  "nodes": [
+    1197119981,
+    1197120093
+  ],
+  "geometry": [
+    { "lat": 53.6464531, "lon": -113.4911499 },
+    { "lat": 53.6474196, "lon": -113.4911485 }
+  ],
+  "tags": {
+    "attribution": "GeoBase®",
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "geobase:acquisitionTechnique": "GPS",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "80",
+    "name": "97 Street NW",
+    "official_name": "Canadian Forces Trail",
+    "old_name": "Namayo Avenue",
+    "oneway": "yes",
+    "ref": "28",
+    "source": "AB Transportation"
+  }
+},
+{
+  "type": "way",
+  "id": 103697918,
+  "bounds": {
+    "minlat": 53.5227273,
+    "minlon": -113.6600355,
+    "maxlat": 53.5230047,
+    "maxlon": -113.6583806
+  },
+  "nodes": [
+    1197232631,
+    1197232040
+  ],
+  "geometry": [
+    { "lat": 53.5227273, "lon": -113.6583806 },
+    { "lat": 53.5230047, "lon": -113.6600355 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "Webber Greens Drive NW",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "width": "7.4"
+  }
+},
+{
+  "type": "way",
+  "id": 116716942,
+  "bounds": {
+    "minlat": 53.4799120,
+    "minlon": -113.6593095,
+    "maxlat": 53.4802508,
+    "maxlon": -113.6575690
+  },
+  "nodes": [
+    1315132415,
+    1315132472
+  ],
+  "geometry": [
+    { "lat": 53.4802508, "lon": -113.6575690 },
+    { "lat": 53.4799120, "lon": -113.6593095 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Lessard Road NW",
+    "oneway": "yes",
+    "sidewalk": "separate"
+  }
+},
+{
+  "type": "way",
+  "id": 116716957,
+  "bounds": {
+    "minlat": 53.4797952,
+    "minlon": -113.6592583,
+    "maxlat": 53.4801377,
+    "maxlon": -113.6575088
+  },
+  "nodes": [
+    1315132651,
+    1315132556
+  ],
+  "geometry": [
+    { "lat": 53.4797952, "lon": -113.6592583 },
+    { "lat": 53.4801377, "lon": -113.6575088 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Lessard Road NW",
+    "oneway": "yes",
+    "sidewalk": "no"
+  }
+},
+{
+  "type": "way",
+  "id": 118508811,
+  "bounds": {
+    "minlat": 53.5996111,
+    "minlon": -113.6384174,
+    "maxlat": 53.6056205,
+    "maxlon": -113.6195645
+  },
+  "nodes": [
+    4169145687,
+    3060396036,
+    3060396266,
+    3060396254,
+    3060396108,
+    4169145681,
+    1332751907,
+    4169145680,
+    3060396104,
+    3060396080,
+    5840327092,
+    5840327120,
+    1332751901,
+    1332751889,
+    4169145679,
+    3060396097,
+    4169145678,
+    3060396255,
+    4169145675,
+    1332751903,
+    4169145674,
+    4169145671,
+    4544447227
+  ],
+  "geometry": [
+    { "lat": 53.5996111, "lon": -113.6195645 },
+    { "lat": 53.5996845, "lon": -113.6202257 },
+    { "lat": 53.5997835, "lon": -113.6209403 },
+    { "lat": 53.5999065, "lon": -113.6216269 },
+    { "lat": 53.6000154, "lon": -113.6221501 },
+    { "lat": 53.6001485, "lon": -113.6226781 },
+    { "lat": 53.6002943, "lon": -113.6231966 },
+    { "lat": 53.6004754, "lon": -113.6237949 },
+    { "lat": 53.6006118, "lon": -113.6241900 },
+    { "lat": 53.6007620, "lon": -113.6245917 },
+    { "lat": 53.6027300, "lon": -113.6294590 },
+    { "lat": 53.6028808, "lon": -113.6298320 },
+    { "lat": 53.6043644, "lon": -113.6335014 },
+    { "lat": 53.6045070, "lon": -113.6338561 },
+    { "lat": 53.6046653, "lon": -113.6342618 },
+    { "lat": 53.6048132, "lon": -113.6346896 },
+    { "lat": 53.6049476, "lon": -113.6351275 },
+    { "lat": 53.6050872, "lon": -113.6356095 },
+    { "lat": 53.6051999, "lon": -113.6360594 },
+    { "lat": 53.6052838, "lon": -113.6364343 },
+    { "lat": 53.6053622, "lon": -113.6368020 },
+    { "lat": 53.6054326, "lon": -113.6371873 },
+    { "lat": 53.6056205, "lon": -113.6384174 }
+  ],
+  "tags": {
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "137 Avenue NW",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 130086437,
+  "bounds": {
+    "minlat": 53.4941332,
+    "minlon": -113.6601992,
+    "maxlat": 53.4943603,
+    "maxlon": -113.6580494
+  },
+  "nodes": [
+    1433881425,
+    650851577
+  ],
+  "geometry": [
+    { "lat": 53.4941332, "lon": -113.6601992 },
+    { "lat": 53.4943603, "lon": -113.6580494 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Callingwood Road NW",
+    "oneway": "yes",
+    "source": "NRCan-CanVec-7.0",
+    "surface": "paved",
+    "width": "10.9"
+  }
+},
+{
+  "type": "way",
+  "id": 130086438,
+  "bounds": {
+    "minlat": 53.4942540,
+    "minlon": -113.6602049,
+    "maxlat": 53.4944814,
+    "maxlon": -113.6580507
+  },
+  "nodes": [
+    1433881438,
+    1433881405
+  ],
+  "geometry": [
+    { "lat": 53.4944814, "lon": -113.6580507 },
+    { "lat": 53.4942540, "lon": -113.6602049 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "62 Avenue NW",
+    "oneway": "yes",
+    "source": "NRCan-CanVec-7.0",
+    "surface": "paved"
+  }
+},
+{
+  "type": "way",
+  "id": 136251003,
+  "bounds": {
+    "minlat": 53.5910323,
+    "minlon": -113.6465341,
+    "maxlat": 53.5917260,
+    "maxlon": -113.6457341
+  },
+  "nodes": [
+    1494945068,
+    1494945069
+  ],
+  "geometry": [
+    { "lat": 53.5910323, "lon": -113.6457341 },
+    { "lat": 53.5917260, "lon": -113.6465341 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Ray Gibbon Drive NW",
+    "name:etymology:wikidata": "Q7297521",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 136251048,
+  "bounds": {
+    "minlat": 53.5909694,
+    "minlon": -113.6467594,
+    "maxlat": 53.5917520,
+    "maxlon": -113.6458423
+  },
+  "nodes": [
+    1494951940,
+    1494951937
+  ],
+  "geometry": [
+    { "lat": 53.5917520, "lon": -113.6467594 },
+    { "lat": 53.5909694, "lon": -113.6458423 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Ray Gibbon Drive NW",
+    "name:etymology:wikidata": "Q7297521",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 170237635,
+  "bounds": {
+    "minlat": 53.4301962,
+    "minlon": -113.5833845,
+    "maxlat": 53.4306010,
+    "maxlon": -113.5826642
+  },
+  "nodes": [
+    1813915246,
+    4278976394
+  ],
+  "geometry": [
+    { "lat": 53.4301962, "lon": -113.5833845 },
+    { "lat": 53.4306010, "lon": -113.5826642 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Rabbit Hill Road NW",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "source": "Bing",
+    "source:name": "Canvec",
+    "surface": "asphalt",
+    "width": "11.5"
+  }
+},
+{
+  "type": "way",
+  "id": 170266841,
+  "bounds": {
+    "minlat": 53.6287360,
+    "minlon": -113.5766019,
+    "maxlat": 53.6297771,
+    "maxlon": -113.5762125
+  },
+  "nodes": [
+    1814015228,
+    30198838
+  ],
+  "geometry": [
+    { "lat": 53.6287360, "lon": -113.5762125 },
+    { "lat": 53.6297771, "lon": -113.5766019 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "4",
+    "layer": "1",
+    "maxspeed": "70",
+    "name": "Campbell Road NW",
+    "oneway": "yes",
+    "source": "Bing",
+    "source:maxspeed": "sign",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 194639800,
+  "bounds": {
+    "minlat": 53.6286299,
+    "minlon": -113.5769288,
+    "maxlat": 53.6296596,
+    "maxlon": -113.5765514
+  },
+  "nodes": [
+    2051408901,
+    2051408922
+  ],
+  "geometry": [
+    { "lat": 53.6296596, "lon": -113.5769288 },
+    { "lat": 53.6286299, "lon": -113.5765514 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "secondary",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "70",
+    "name": "Campbell Road NW",
+    "oneway": "yes",
+    "source": "Bing",
+    "source:maxspeed": "sign",
+    "source:name": "Canvec",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 208364040,
+  "bounds": {
+    "minlat": 53.5402984,
+    "minlon": -113.3433373,
+    "maxlat": 53.5403920,
+    "maxlon": -113.3419588
+  },
+  "nodes": [
+    2186649844,
+    2186649847
+  ],
+  "geometry": [
+    { "lat": 53.5402984, "lon": -113.3433373 },
+    { "lat": 53.5403920, "lon": -113.3419588 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "highway": "primary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "70",
+    "name": "Baseline Road",
+    "oneway": "yes",
+    "source": "AB Transportation"
+  }
+},
+{
+  "type": "way",
+  "id": 219618298,
+  "bounds": {
+    "minlat": 53.5995759,
+    "minlon": -113.6389993,
+    "maxlat": 53.6055764,
+    "maxlon": -113.6202626
+  },
+  "nodes": [
+    1332751905,
+    3740756024,
+    4169145672,
+    4169145673,
+    404496855,
+    4169145676,
+    3060396048,
+    3060396084,
+    4169145677,
+    404496853,
+    404496851,
+    404496849,
+    5840327121,
+    5840327122,
+    3060396297,
+    4169145682,
+    3060396073,
+    4169145683,
+    404496847,
+    4169145684,
+    3060396129,
+    4169145685,
+    3060396257,
+    3060396305
+  ],
+  "geometry": [
+    { "lat": 53.6055764, "lon": -113.6389993 },
+    { "lat": 53.6055513, "lon": -113.6388428 },
+    { "lat": 53.6053285, "lon": -113.6373123 },
+    { "lat": 53.6052498, "lon": -113.6368695 },
+    { "lat": 53.6051763, "lon": -113.6364823 },
+    { "lat": 53.6050695, "lon": -113.6360059 },
+    { "lat": 53.6049050, "lon": -113.6353970 },
+    { "lat": 53.6047464, "lon": -113.6348834 },
+    { "lat": 53.6045874, "lon": -113.6344052 },
+    { "lat": 53.6044257, "lon": -113.6339846 },
+    { "lat": 53.6043176, "lon": -113.6337095 },
+    { "lat": 53.6038204, "lon": -113.6324918 },
+    { "lat": 53.6027649, "lon": -113.6299424 },
+    { "lat": 53.6026127, "lon": -113.6295750 },
+    { "lat": 53.6008124, "lon": -113.6252269 },
+    { "lat": 53.6006266, "lon": -113.6247411 },
+    { "lat": 53.6004197, "lon": -113.6241413 },
+    { "lat": 53.6003506, "lon": -113.6239268 },
+    { "lat": 53.6001617, "lon": -113.6233162 },
+    { "lat": 53.6000166, "lon": -113.6227602 },
+    { "lat": 53.5998932, "lon": -113.6222259 },
+    { "lat": 53.5997872, "lon": -113.6216854 },
+    { "lat": 53.5996730, "lon": -113.6209870 },
+    { "lat": 53.5995759, "lon": -113.6202626 }
+  ],
+  "tags": {
+    "cycleway": "no",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "137 Avenue NW",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 232709695,
+  "bounds": {
+    "minlat": 53.5128903,
+    "minlon": -113.3449944,
+    "maxlat": 53.5132194,
+    "maxlon": -113.3429877
+  },
+  "nodes": [
+    3773638420,
+    2410403315
+  ],
+  "geometry": [
+    { "lat": 53.5128903, "lon": -113.3429877 },
+    { "lat": 53.5132194, "lon": -113.3449944 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "highway": "motorway",
+    "lanes": "4",
+    "layer": "1",
+    "maxspeed": "70",
+    "name": "Sherwood Park Freeway",
+    "oneway": "yes",
+    "unsigned_ref": "100"
+  }
+},
+{
+  "type": "way",
+  "id": 301873124,
+  "bounds": {
+    "minlat": 53.6083675,
+    "minlon": -113.6150915,
+    "maxlat": 53.6095145,
+    "maxlon": -113.6150558
+  },
+  "nodes": [
+    3060400080,
+    3060400076
+  ],
+  "geometry": [
+    { "lat": 53.6083675, "lon": -113.6150558 },
+    { "lat": 53.6095145, "lon": -113.6150915 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "170 Street NW",
+    "source": "extrapololated"
+  }
+},
+{
+  "type": "way",
+  "id": 301873126,
+  "bounds": {
+    "minlat": 53.6095145,
+    "minlon": -113.6150915,
+    "maxlat": 53.6115524,
+    "maxlon": -113.6150822
+  },
+  "nodes": [
+    3060400076,
+    1663538094,
+    1663538093,
+    354553799
+  ],
+  "geometry": [
+    { "lat": 53.6095145, "lon": -113.6150915 },
+    { "lat": 53.6103471, "lon": -113.6150877 },
+    { "lat": 53.6111235, "lon": -113.6150842 },
+    { "lat": 53.6115524, "lon": -113.6150822 }
+  ],
+  "tags": {
+    "hgv": "no",
+    "highway": "secondary",
+    "maxspeed": "60",
+    "name": "170 Street NW",
+    "source": "extrapololated"
+  }
+},
+{
+  "type": "way",
+  "id": 313692014,
+  "bounds": {
+    "minlat": 53.5738555,
+    "minlon": -113.6646644,
+    "maxlat": 53.5739154,
+    "maxlon": -113.6606998
+  },
+  "nodes": [
+    2836936362,
+    2784753739,
+    7903611004,
+    766114226
+  ],
+  "geometry": [
+    { "lat": 53.5738555, "lon": -113.6606998 },
+    { "lat": 53.5738840, "lon": -113.6621225 },
+    { "lat": 53.5739067, "lon": -113.6633411 },
+    { "lat": 53.5739154, "lon": -113.6646644 }
+  ],
+  "tags": {
+    "NHS": "yes",
+    "addr:housenumber:first:left": "26118;26106;21504;18904",
+    "addr:housenumber:last:left": "26216;26116;23060;19660",
+    "alt_name": "Yellowhead Highway",
+    "alt_name:en": "Yellowhead Highway",
+    "alt_name:fr": "Route Yellowhead",
+    "attribution": "GeoBase®",
+    "geobase:acquisitionTechnique": "GPS",
+    "geobase:roadsegmentid": "39964;113387;176887;72813;137365;348843;260905",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "is_in": "Parkland County;Edmonton",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "100",
+    "name": "Yellowhead Trail NW",
+    "name:etymology:wikidata": "Q22647683",
+    "nat_name": "Trans-Canada Highway",
+    "nat_name:en": "Trans-Canada Highway",
+    "nat_name:fr": "Route Transcanadienne",
+    "oneway": "yes",
+    "ref": "16",
+    "source": "NRN - Alberta V7.0"
+  }
+},
+{
+  "type": "way",
+  "id": 324629664,
+  "bounds": {
+    "minlat": 53.5404188,
+    "minlon": -113.3433379,
+    "maxlat": 53.5405110,
+    "maxlon": -113.3419579
+  },
+  "nodes": [
+    3313391938,
+    3313391934
+  ],
+  "geometry": [
+    { "lat": 53.5405110, "lon": -113.3419579 },
+    { "lat": 53.5404188, "lon": -113.3433379 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "highway": "primary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "70",
+    "name": "Baseline Road",
+    "oneway": "yes",
+    "source": "AB Transportation"
+  }
+},
+{
+  "type": "way",
+  "id": 325331192,
+  "bounds": {
+    "minlat": 53.6303878,
+    "minlon": -113.5667478,
+    "maxlat": 53.6336543,
+    "maxlon": -113.5659467
+  },
+  "nodes": [
+    354275213,
+    11843043914,
+    1814015282,
+    11098522483,
+    1814015249,
+    1484336476,
+    11098522480,
+    3320012797,
+    3320012775,
+    11098522478,
+    11098522477,
+    11098522476
+  ],
+  "geometry": [
+    { "lat": 53.6336543, "lon": -113.5659467 },
+    { "lat": 53.6324473, "lon": -113.5659470 },
+    { "lat": 53.6322065, "lon": -113.5659604 },
+    { "lat": 53.6319720, "lon": -113.5659829 },
+    { "lat": 53.6317790, "lon": -113.5660111 },
+    { "lat": 53.6315222, "lon": -113.5660773 },
+    { "lat": 53.6312832, "lon": -113.5661676 },
+    { "lat": 53.6311100, "lon": -113.5662435 },
+    { "lat": 53.6309287, "lon": -113.5663563 },
+    { "lat": 53.6307655, "lon": -113.5664626 },
+    { "lat": 53.6306110, "lon": -113.5665738 },
+    { "lat": 53.6303878, "lon": -113.5667478 }
+  ],
+  "tags": {
+    "attribution": "GeoBase®",
+    "geobase:acquisitionTechnique": "GPS;Orthoimage",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "maxspeed": "60",
+    "name": "142 Street NW",
+    "oneway": "yes",
+    "source": "Geobase_Import_2009;NRCan-CanVec-7.0",
+    "surface": "paved"
+  }
+},
+{
+  "type": "way",
+  "id": 368633859,
+  "bounds": {
+    "minlat": 53.6172543,
+    "minlon": -113.3602756,
+    "maxlat": 53.6174660,
+    "maxlon": -113.3583768
+  },
+  "nodes": [
+    3724868389,
+    3724868292
+  ],
+  "geometry": [
+    { "lat": 53.6174660, "lon": -113.3583768 },
+    { "lat": 53.6172543, "lon": -113.3602756 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "153 Avenue NW",
+    "oneway": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 382743522,
+  "bounds": {
+    "minlat": 53.6020459,
+    "minlon": -113.6150558,
+    "maxlat": 53.6083675,
+    "maxlon": -113.6149806
+  },
+  "nodes": [
+    3060400080,
+    6113616819,
+    1661089026,
+    4544447216
+  ],
+  "geometry": [
+    { "lat": 53.6083675, "lon": -113.6150558 },
+    { "lat": 53.6059426, "lon": -113.6150241 },
+    { "lat": 53.6040904, "lon": -113.6149998 },
+    { "lat": 53.6020459, "lon": -113.6149806 }
+  ],
+  "tags": {
+    "hgv": "no",
+    "highway": "secondary",
+    "maxspeed": "60",
+    "name": "170 Street NW",
+    "source": "extrapololated"
+  }
+},
+{
+  "type": "way",
+  "id": 428799255,
+  "bounds": {
+    "minlat": 53.4302560,
+    "minlon": -113.5835781,
+    "maxlat": 53.4306643,
+    "maxlon": -113.5828505
+  },
+  "nodes": [
+    4278976393,
+    1068445624
+  ],
+  "geometry": [
+    { "lat": 53.4306643, "lon": -113.5828505 },
+    { "lat": 53.4302560, "lon": -113.5835781 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Rabbit Hill Road NW",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "surface": "asphalt",
+    "width": "12"
+  }
+},
+{
+  "type": "way",
+  "id": 428799256,
+  "bounds": {
+    "minlat": 53.4306010,
+    "minlon": -113.5826642,
+    "maxlat": 53.4309198,
+    "maxlon": -113.5820897
+  },
+  "nodes": [
+    4278976394,
+    1813915306
+  ],
+  "geometry": [
+    { "lat": 53.4306010, "lon": -113.5826642 },
+    { "lat": 53.4309198, "lon": -113.5820897 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Rabbit Hill Road NW",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "source": "Bing",
+    "source:name": "Canvec",
+    "surface": "asphalt",
+    "width": "11.5"
+  }
+},
+{
+  "type": "way",
+  "id": 458271885,
+  "bounds": {
+    "minlat": 53.5917260,
+    "minlon": -113.6481595,
+    "maxlat": 53.5931218,
+    "maxlon": -113.6465341
+  },
+  "nodes": [
+    1494945069,
+    1494945070,
+    1494946238
+  ],
+  "geometry": [
+    { "lat": 53.5917260, "lon": -113.6465341 },
+    { "lat": 53.5928573, "lon": -113.6478529 },
+    { "lat": 53.5931218, "lon": -113.6481595 }
+  ],
+  "tags": {
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "highway": "secondary",
+    "lanes": "2",
+    "maxspeed": "60",
+    "name": "Ray Gibbon Drive NW",
+    "name:etymology:wikidata": "Q7297521",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 458503914,
+  "bounds": {
+    "minlat": 53.6282339,
+    "minlon": -113.3968844,
+    "maxlat": 53.6348315,
+    "maxlon": -113.3943402
+  },
+  "nodes": [
+    962037995,
+    33051536,
+    1489625698
+  ],
+  "geometry": [
+    { "lat": 53.6348315, "lon": -113.3943402 },
+    { "lat": 53.6318236, "lon": -113.3954995 },
+    { "lat": 53.6282339, "lon": -113.3968844 }
+  ],
+  "tags": {
+    "NHS": "yes",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "trunk",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "70",
+    "name": "Manning Drive NW",
+    "name:etymology:wikidata": "Q1356461",
+    "oneway": "yes",
+    "ref": "15",
+    "shoulder": "both",
+    "sidewalk": "no",
+    "surface": "asphalt",
+    "width": "7.4"
+  }
+},
+{
+  "type": "way",
+  "id": 458684716,
+  "bounds": {
+    "minlat": 53.6173647,
+    "minlon": -113.6028770,
+    "maxlat": 53.6182827,
+    "maxlon": -113.6011432
+  },
+  "nodes": [
+    1197120035,
+    544327743,
+    1310592803
+  ],
+  "geometry": [
+    { "lat": 53.6173647, "lon": -113.6011432 },
+    { "lat": 53.6179296, "lon": -113.6021907 },
+    { "lat": 53.6182827, "lon": -113.6028770 }
+  ],
+  "tags": {
+    "dual_carriageway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "St. Albert Trail NW",
+    "oneway": "yes",
+    "ref": "2"
+  }
+},
+{
+  "type": "way",
+  "id": 467537699,
+  "bounds": {
+    "minlat": 53.4379444,
+    "minlon": -113.3690855,
+    "maxlat": 53.4390574,
+    "maxlon": -113.3690853
+  },
+  "nodes": [
+    4621454731,
+    4621454734
+  ],
+  "geometry": [
+    { "lat": 53.4390574, "lon": -113.3690853 },
+    { "lat": 53.4379444, "lon": -113.3690855 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "1",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "17 Street NW",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 471782370,
+  "bounds": {
+    "minlat": 53.5121483,
+    "minlon": -113.6587961,
+    "maxlat": 53.5121578,
+    "maxlon": -113.6556230
+  },
+  "nodes": [
+    7903611013,
+    441987961
+  ],
+  "geometry": [
+    { "lat": 53.5121578, "lon": -113.6587961 },
+    { "lat": 53.5121483, "lon": -113.6556230 }
+  ],
+  "tags": {
+    "bicycle": "no",
+    "destination:ref:lanes": "216 North||",
+    "destination:street:lanes": "Anthony Henday Drive||",
+    "hgv": "designated",
+    "highway": "trunk",
+    "lanes": "3",
+    "lit": "yes",
+    "maxheight": "5.6",
+    "maxspeed": "80",
+    "name": "Whitemud Drive NW",
+    "oneway": "yes",
+    "placement": "right_of:2",
+    "ref": "2",
+    "turn:lanes": "left|through|through",
+    "width": "10.9"
+  }
+},
+{
+  "type": "way",
+  "id": 472814762,
+  "bounds": {
+    "minlat": 53.4379904,
+    "minlon": -113.3689376,
+    "maxlat": 53.4391091,
+    "maxlon": -113.3689321
+  },
+  "nodes": [
+    4670173541,
+    253718166
+  ],
+  "geometry": [
+    { "lat": 53.4379904, "lon": -113.3689376 },
+    { "lat": 53.4391091, "lon": -113.3689321 }
+  ],
+  "tags": {
+    "attribution": "GeoBase®",
+    "bridge": "yes",
+    "geobase:acquisitionTechnique": "GPS",
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "1",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "17 Street NW",
+    "oneway": "yes",
+    "source": "Geobase_Import_2009",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 474333601,
+  "bounds": {
+    "minlat": 53.6448662,
+    "minlon": -113.4913964,
+    "maxlat": 53.6464716,
+    "maxlon": -113.4912993
+  },
+  "nodes": [
+    778570488,
+    9591694860,
+    778570491
+  ],
+  "geometry": [
+    { "lat": 53.6464716, "lon": -113.4912993 },
+    { "lat": 53.6456697, "lon": -113.4913149 },
+    { "lat": 53.6448662, "lon": -113.4913964 }
+  ],
+  "tags": {
+    "attribution": "GeoBase®",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "geobase:acquisitionTechnique": "GPS",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "80",
+    "name": "97 Street NW",
+    "official_name": "Canadian Forces Trail",
+    "old_name": "Namayo Avenue",
+    "oneway": "yes",
+    "ref": "28",
+    "source": "NRN - Alberta V7.0"
+  }
+},
+{
+  "type": "way",
+  "id": 505170026,
+  "bounds": {
+    "minlat": 53.4369463,
+    "minlon": -113.4839392,
+    "maxlat": 53.4385293,
+    "maxlon": -113.4831921
+  },
+  "nodes": [
+    1916673337,
+    4951837837,
+    4951837838,
+    4951837839,
+    4951837840,
+    4951837841,
+    228150876
+  ],
+  "geometry": [
+    { "lat": 53.4385293, "lon": -113.4839392 },
+    { "lat": 53.4380099, "lon": -113.4836999 },
+    { "lat": 53.4377454, "lon": -113.4835689 },
+    { "lat": 53.4375613, "lon": -113.4834661 },
+    { "lat": 53.4373377, "lon": -113.4833553 },
+    { "lat": 53.4371098, "lon": -113.4832569 },
+    { "lat": 53.4369463, "lon": -113.4831921 }
+  ],
+  "tags": {
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "lit": "yes",
+    "maxheight": "6",
+    "maxspeed": "60",
+    "name": "Parsons Road NW",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 610941842,
+  "bounds": {
+    "minlat": 53.4372575,
+    "minlon": -113.4903953,
+    "maxlat": 53.4380748,
+    "maxlon": -113.4900980
+  },
+  "nodes": [
+    1503281693,
+    5785446517,
+    1503281480,
+    1503281500,
+    246725528,
+    5785446513,
+    1503281612
+  ],
+  "geometry": [
+    { "lat": 53.4372575, "lon": -113.4900980 },
+    { "lat": 53.4374460, "lon": -113.4901399 },
+    { "lat": 53.4375804, "lon": -113.4901788 },
+    { "lat": 53.4377061, "lon": -113.4902247 },
+    { "lat": 53.4379039, "lon": -113.4903133 },
+    { "lat": 53.4379474, "lon": -113.4903372 },
+    { "lat": 53.4380748, "lon": -113.4903953 }
+  ],
+  "tags": {
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "90",
+    "name": "Gateway Boulevard SW",
+    "oneway": "yes",
+    "ref": "2",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 610941843,
+  "bounds": {
+    "minlat": 53.4370406,
+    "minlon": -113.4900980,
+    "maxlat": 53.4372575,
+    "maxlon": -113.4900348
+  },
+  "nodes": [
+    246725531,
+    1503281693
+  ],
+  "geometry": [
+    { "lat": 53.4370406, "lon": -113.4900348 },
+    { "lat": 53.4372575, "lon": -113.4900980 }
+  ],
+  "tags": {
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "lanes": "3",
+    "lit": "yes",
+    "maxheight": "5.6",
+    "maxspeed": "90",
+    "name": "Gateway Boulevard SW",
+    "oneway": "yes",
+    "ref": "2",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 610941846,
+  "bounds": {
+    "minlat": 53.4333055,
+    "minlon": -113.4917864,
+    "maxlat": 53.4370237,
+    "maxlon": -113.4904475
+  },
+  "nodes": [
+    1503281522,
+    246725527,
+    1503281687,
+    246288793,
+    284140797,
+    1503281642,
+    5785446522,
+    5785446523,
+    246289823,
+    1503281475,
+    1503281704
+  ],
+  "geometry": [
+    { "lat": 53.4370237, "lon": -113.4904937 },
+    { "lat": 53.4367019, "lon": -113.4904556 },
+    { "lat": 53.4362026, "lon": -113.4904475 },
+    { "lat": 53.4357206, "lon": -113.4905110 },
+    { "lat": 53.4354363, "lon": -113.4905819 },
+    { "lat": 53.4350695, "lon": -113.4906874 },
+    { "lat": 53.4350112, "lon": -113.4907140 },
+    { "lat": 53.4349081, "lon": -113.4907609 },
+    { "lat": 53.4345291, "lon": -113.4909336 },
+    { "lat": 53.4340258, "lon": -113.4912413 },
+    { "lat": 53.4333055, "lon": -113.4917864 }
+  ],
+  "tags": {
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "90",
+    "name": "Calgary Trail SW",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "ref": "2",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 610941856,
+  "bounds": {
+    "minlat": 53.4260034,
+    "minlon": -113.4928610,
+    "maxlat": 53.4370406,
+    "maxlon": -113.4898952
+  },
+  "nodes": [
+    5042749008,
+    30233125,
+    1977522786,
+    1977522743,
+    1977522674,
+    30233126,
+    1977522770,
+    1977522700,
+    36396913,
+    1977522684,
+    1977522798,
+    1977522805,
+    246755126,
+    1503281720,
+    1503281701,
+    30198983,
+    5785446524,
+    1503281613,
+    1503281635,
+    1503281580,
+    1503281732,
+    36396937,
+    1503281654,
+    1503281471,
+    1503281709,
+    246725531
+  ],
+  "geometry": [
+    { "lat": 53.4260034, "lon": -113.4928610 },
+    { "lat": 53.4263780, "lon": -113.4926304 },
+    { "lat": 53.4265799, "lon": -113.4926151 },
+    { "lat": 53.4266773, "lon": -113.4926079 },
+    { "lat": 53.4268625, "lon": -113.4925943 },
+    { "lat": 53.4272450, "lon": -113.4925521 },
+    { "lat": 53.4275812, "lon": -113.4924978 },
+    { "lat": 53.4280004, "lon": -113.4924136 },
+    { "lat": 53.4282285, "lon": -113.4923671 },
+    { "lat": 53.4285583, "lon": -113.4922725 },
+    { "lat": 53.4298346, "lon": -113.4918174 },
+    { "lat": 53.4303522, "lon": -113.4916182 },
+    { "lat": 53.4312699, "lon": -113.4912788 },
+    { "lat": 53.4341985, "lon": -113.4902052 },
+    { "lat": 53.4344321, "lon": -113.4901263 },
+    { "lat": 53.4346743, "lon": -113.4900532 },
+    { "lat": 53.4348445, "lon": -113.4900103 },
+    { "lat": 53.4351399, "lon": -113.4899455 },
+    { "lat": 53.4353109, "lon": -113.4899206 },
+    { "lat": 53.4356560, "lon": -113.4899018 },
+    { "lat": 53.4359298, "lon": -113.4898952 },
+    { "lat": 53.4361801, "lon": -113.4899076 },
+    { "lat": 53.4364481, "lon": -113.4899328 },
+    { "lat": 53.4366638, "lon": -113.4899618 },
+    { "lat": 53.4368341, "lon": -113.4899911 },
+    { "lat": 53.4370406, "lon": -113.4900348 }
+  ],
+  "tags": {
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "lanes": "3",
+    "lit": "yes",
+    "maxheight": "5.5",
+    "maxspeed": "90",
+    "name": "Gateway Boulevard SW",
+    "oneway": "yes",
+    "ref": "2",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 613255276,
+  "bounds": {
+    "minlat": 53.5379517,
+    "minlon": -113.6610846,
+    "maxlat": 53.5390194,
+    "maxlon": -113.6577168
+  },
+  "nodes": [
+    2788612149,
+    2788612139,
+    246982203
+  ],
+  "geometry": [
+    { "lat": 53.5390194, "lon": -113.6610846 },
+    { "lat": 53.5386160, "lon": -113.6598124 },
+    { "lat": 53.5379517, "lon": -113.6577168 }
+  ],
+  "tags": {
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "lanes": "3",
+    "maxheight": "5.4",
+    "maxspeed": "70",
+    "name": "100 Avenue NW",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "ref": "16A",
+    "surface": "asphalt",
+    "turn:lanes": "through|through|merge_to_left",
+    "width": "11.1"
+  }
+},
+{
+  "type": "way",
+  "id": 622611466,
+  "bounds": {
+    "minlat": 53.5412288,
+    "minlon": -113.6634727,
+    "maxlat": 53.5412595,
+    "maxlon": -113.6575092
+  },
+  "nodes": [
+    1663519949,
+    8689071981,
+    5880831480,
+    7903611077,
+    1491980679
+  ],
+  "geometry": [
+    { "lat": 53.5412595, "lon": -113.6575092 },
+    { "lat": 53.5412594, "lon": -113.6583504 },
+    { "lat": 53.5412591, "lon": -113.6609958 },
+    { "lat": 53.5412594, "lon": -113.6630286 },
+    { "lat": 53.5412288, "lon": -113.6634727 }
+  ],
+  "tags": {
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "motorway",
+    "lanes": "3",
+    "maxheight": "5.4",
+    "maxspeed": "90",
+    "name": "Stony Plain Road NW",
+    "name:etymology:wikidata": "Q1744021",
+    "oneway": "yes",
+    "placement": "left_of:2",
+    "ref": "16A",
+    "source:maxspeed": "sign",
+    "surface": "asphalt",
+    "turn:lanes": "through|through|merge_to_left",
+    "width": "11.1"
+  }
+},
+{
+  "type": "way",
+  "id": 687848974,
+  "bounds": {
+    "minlat": 53.4359298,
+    "minlon": -113.3942852,
+    "maxlat": 53.4394356,
+    "maxlon": -113.3939319
+  },
+  "nodes": [
+    5341857376,
+    10278297284,
+    1315178550,
+    1315178603,
+    3266210101,
+    1315177650,
+    1315177799,
+    1315177704,
+    3266210102,
+    3266210103,
+    277413467
+  ],
+  "geometry": [
+    { "lat": 53.4394356, "lon": -113.3939319 },
+    { "lat": 53.4390115, "lon": -113.3939386 },
+    { "lat": 53.4389320, "lon": -113.3939408 },
+    { "lat": 53.4385938, "lon": -113.3939675 },
+    { "lat": 53.4383373, "lon": -113.3939849 },
+    { "lat": 53.4380509, "lon": -113.3940389 },
+    { "lat": 53.4376252, "lon": -113.3941149 },
+    { "lat": 53.4373031, "lon": -113.3941896 },
+    { "lat": 53.4369126, "lon": -113.3942457 },
+    { "lat": 53.4364787, "lon": -113.3942852 },
+    { "lat": 53.4359298, "lon": -113.3942831 }
+  ],
+  "tags": {
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "34 Street NW",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 699534465,
+  "bounds": {
+    "minlat": 53.6432963,
+    "minlon": -113.4674873,
+    "maxlat": 53.6465178,
+    "maxlon": -113.4674341
+  },
+  "nodes": [
+    7672500099,
+    3262750975,
+    1168893337,
+    3262750968,
+    1197119868
+  ],
+  "geometry": [
+    { "lat": 53.6432963, "lon": -113.4674360 },
+    { "lat": 53.6433856, "lon": -113.4674648 },
+    { "lat": 53.6435317, "lon": -113.4674847 },
+    { "lat": 53.6436795, "lon": -113.4674873 },
+    { "lat": 53.6465178, "lon": -113.4674341 }
+  ],
+  "tags": {
+    "hgv": "no",
+    "highway": "secondary",
+    "lane_markings": "yes",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "82 Street NW",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 763517714,
+  "bounds": {
+    "minlat": 53.4662722,
+    "minlon": -113.6322543,
+    "maxlat": 53.4666057,
+    "maxlon": -113.6315703
+  },
+  "nodes": [
+    7134744723,
+    10219962003,
+    1068497355
+  ],
+  "geometry": [
+    { "lat": 53.4666057, "lon": -113.6315703 },
+    { "lat": 53.4664114, "lon": -113.6319686 },
+    { "lat": 53.4662722, "lon": -113.6322543 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "3",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "184 Street NW",
+    "oneway": "yes",
+    "placement": "left_of:3",
+    "source": "AB Transportation",
+    "source:maxspeed": "sign",
+    "turn:lanes": "left|through|through",
+    "website": "https://www.transportation.alberta.ca/Content/docType353/production/DisplayBoardsMar25-10.pdf"
+  }
+},
+{
+  "type": "way",
+  "id": 763517715,
+  "bounds": {
+    "minlat": 53.4662149,
+    "minlon": -113.6320497,
+    "maxlat": 53.4663762,
+    "maxlon": -113.6317111
+  },
+  "nodes": [
+    1068497480,
+    7134744722
+  ],
+  "geometry": [
+    { "lat": 53.4662149, "lon": -113.6320497 },
+    { "lat": 53.4663762, "lon": -113.6317111 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "hgv": "no",
+    "highway": "secondary",
+    "lanes": "2",
+    "layer": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "184 Street NW",
+    "oneway": "yes",
+    "source": "AB Transportation",
+    "source:maxspeed": "sign",
+    "website": "https://www.transportation.alberta.ca/Content/docType353/production/DisplayBoardsMar25-10.pdf"
+  }
+},
+{
+  "type": "way",
+  "id": 847002318,
+  "bounds": {
+    "minlat": 53.5121578,
+    "minlon": -113.6621066,
+    "maxlat": 53.5121673,
+    "maxlon": -113.6587961
+  },
+  "nodes": [
+    255626939,
+    7903611013
+  ],
+  "geometry": [
+    { "lat": 53.5121673, "lon": -113.6621066 },
+    { "lat": 53.5121578, "lon": -113.6587961 }
+  ],
+  "tags": {
+    "bicycle": "no",
+    "hgv": "designated",
+    "highway": "trunk",
+    "lanes": "2",
+    "lit": "yes",
+    "maxheight": "5.6",
+    "maxspeed": "80",
+    "name": "Whitemud Drive NW",
+    "oneway": "yes",
+    "ref": "2",
+    "width": "7.4"
+  }
+},
+{
+  "type": "way",
+  "id": 847002319,
+  "bounds": {
+    "minlat": 53.5122886,
+    "minlon": -113.6619745,
+    "maxlat": 53.5122975,
+    "maxlon": -113.6597080
+  },
+  "nodes": [
+    7903611014,
+    225339219
+  ],
+  "geometry": [
+    { "lat": 53.5122886, "lon": -113.6597080 },
+    { "lat": 53.5122975, "lon": -113.6619745 }
+  ],
+  "tags": {
+    "bicycle": "no",
+    "destination:ref:lanes": "216 South||",
+    "destination:street:lanes": "Anthony Henday Drive||",
+    "hgv": "designated",
+    "highway": "trunk",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "80",
+    "name": "Whitemud Drive NW",
+    "oneway": "yes",
+    "placement": "right_of:2",
+    "ref": "2",
+    "turn:lanes": "left|through|through",
+    "width": "10.9"
+  }
+},
+{
+  "type": "way",
+  "id": 847002320,
+  "bounds": {
+    "minlat": 53.5122708,
+    "minlon": -113.6597080,
+    "maxlat": 53.5122886,
+    "maxlon": -113.6554172
+  },
+  "nodes": [
+    441987962,
+    7903611014
+  ],
+  "geometry": [
+    { "lat": 53.5122708, "lon": -113.6554172 },
+    { "lat": 53.5122886, "lon": -113.6597080 }
+  ],
+  "tags": {
+    "bicycle": "no",
+    "hgv": "designated",
+    "highway": "trunk",
+    "lanes": "2",
+    "lit": "yes",
+    "maxheight": "5.6",
+    "maxspeed": "80",
+    "name": "Whitemud Drive NW",
+    "oneway": "yes",
+    "ref": "2",
+    "width": "7.4"
+  }
+},
+{
+  "type": "way",
+  "id": 1091892046,
+  "bounds": {
+    "minlat": 53.6473656,
+    "minlon": -113.4674377,
+    "maxlat": 53.6505103,
+    "maxlon": -113.4673691
+  },
+  "nodes": [
+    1197119984,
+    1168893370,
+    7855324967,
+    10000027584
+  ],
+  "geometry": [
+    { "lat": 53.6473656, "lon": -113.4674308 },
+    { "lat": 53.6489925, "lon": -113.4674377 },
+    { "lat": 53.6503009, "lon": -113.4673781 },
+    { "lat": 53.6505103, "lon": -113.4673691 }
+  ],
+  "tags": {
+    "hgv": "no",
+    "highway": "secondary",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "82 Street NW"
+  }
+},
+{
+  "type": "way",
+  "id": 1257968464,
+  "bounds": {
+    "minlat": 53.5401480,
+    "minlon": -113.3456715,
+    "maxlat": 53.5402984,
+    "maxlon": -113.3433373
+  },
+  "nodes": [
+    3313391924,
+    3402432463,
+    2186649844
+  ],
+  "geometry": [
+    { "lat": 53.5401480, "lon": -113.3456715 },
+    { "lat": 53.5401851, "lon": -113.3449540 },
+    { "lat": 53.5402984, "lon": -113.3433373 }
+  ],
+  "tags": {
+    "highway": "primary",
+    "lanes": "3",
+    "maxspeed": "70",
+    "name": "Baseline Road",
+    "oneway": "yes",
+    "source": "AB Transportation",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 1264091402,
+  "bounds": {
+    "minlat": 53.5870215,
+    "minlon": -113.3445424,
+    "maxlat": 53.5871630,
+    "maxlon": -113.3434448
+  },
+  "nodes": [
+    1194808063,
+    1194814542
+  ],
+  "geometry": [
+    { "lat": 53.5871630, "lon": -113.3445424 },
+    { "lat": 53.5870215, "lon": -113.3434448 }
+  ],
+  "tags": {
+    "highway": "secondary",
+    "maxspeed": "60",
+    "name": "Aurum Road NE",
+    "oneway": "yes",
+    "source": "AB Transportation"
+  }
+},
+{
+  "type": "way",
+  "id": 1286192399,
+  "bounds": {
+    "minlat": 53.5698740,
+    "minlon": -113.3468360,
+    "maxlat": 53.5699584,
+    "maxlon": -113.3410906
+  },
+  "nodes": [
+    763813005,
+    1194814489,
+    4400664175
+  ],
+  "geometry": [
+    { "lat": 53.5698740, "lon": -113.3468360 },
+    { "lat": 53.5699367, "lon": -113.3422276 },
+    { "lat": 53.5699584, "lon": -113.3410906 }
+  ],
+  "tags": {
+    "destination:lanes": "Lloydminster|Lloydminster|Lloydminster|Broadmoor Boulevard;Sherwood Drive",
+    "highway": "motorway",
+    "lanes": "4",
+    "maxspeed": "100",
+    "name": "Yellowhead Highway",
+    "name:etymology:wikidata": "Q22647683",
+    "oneway": "yes",
+    "ref": "16",
+    "source": "local_knowledge",
+    "turn:lanes": "none|none|through;slight_right|slight_right"
+  }
+},
+{
+  "type": "way",
+  "id": 1383329439,
+  "bounds": {
+    "minlat": 53.6166929,
+    "minlon": -113.6008453,
+    "maxlat": 53.6170392,
+    "maxlon": -113.6002007
+  },
+  "nodes": [
+    1661273610,
+    1197119861
+  ],
+  "geometry": [
+    { "lat": 53.6170392, "lon": -113.6008453 },
+    { "lat": 53.6166929, "lon": -113.6002007 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "Mark Messier Trail NW",
+    "name:etymology:wikidata": "Q319247",
+    "oneway": "yes",
+    "placement": "right_of:2",
+    "ref": "2"
+  }
+},
+{
+  "type": "way",
+  "id": 1383329440,
+  "bounds": {
+    "minlat": 53.6172880,
+    "minlon": -113.6021381,
+    "maxlat": 53.6177124,
+    "maxlon": -113.6013057
+  },
+  "nodes": [
+    12806743527,
+    1197120211
+  ],
+  "geometry": [
+    { "lat": 53.6177124, "lon": -113.6021381 },
+    { "lat": 53.6172880, "lon": -113.6013057 }
+  ],
+  "tags": {
+    "dual_carriageway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "4",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "Mark Messier Trail NW",
+    "name:etymology:wikidata": "Q319247",
+    "oneway": "yes",
+    "ref": "2",
+    "turn:lanes": "through|through|through|slight_right"
+  }
+},
+{
+  "type": "way",
+  "id": 1383329442,
+  "bounds": {
+    "minlat": 53.6169507,
+    "minlon": -113.6011432,
+    "maxlat": 53.6173647,
+    "maxlon": -113.6003663
+  },
+  "nodes": [
+    9454142522,
+    1197120035
+  ],
+  "geometry": [
+    { "lat": 53.6169507, "lon": -113.6003663 },
+    { "lat": 53.6173647, "lon": -113.6011432 }
+  ],
+  "tags": {
+    "bridge": "yes",
+    "dual_carriageway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "primary",
+    "lanes": "3",
+    "layer": "1",
+    "maxspeed": "60",
+    "name": "St. Albert Trail NW",
+    "oneway": "yes",
+    "ref": "2"
+  }
+},
+{
+  "type": "way",
+  "id": 1442704593,
+  "bounds": {
+    "minlat": 53.6290404,
+    "minlon": -113.5677422,
+    "maxlat": 53.6337176,
+    "maxlon": -113.5657801
+  },
+  "nodes": [
+    3320012790,
+    3320012783,
+    5608080883,
+    3320012784,
+    3320012785,
+    3320012786,
+    3320012798,
+    11098522481,
+    11098522482,
+    3320012799,
+    11098522484,
+    11098522485,
+    3320012800,
+    11843043909,
+    3320012801
+  ],
+  "geometry": [
+    { "lat": 53.6290404, "lon": -113.5677422 },
+    { "lat": 53.6291359, "lon": -113.5676576 },
+    { "lat": 53.6292463, "lon": -113.5675590 },
+    { "lat": 53.6303401, "lon": -113.5665800 },
+    { "lat": 53.6305443, "lon": -113.5664200 },
+    { "lat": 53.6307498, "lon": -113.5662744 },
+    { "lat": 53.6309141, "lon": -113.5661694 },
+    { "lat": 53.6311041, "lon": -113.5660779 },
+    { "lat": 53.6312907, "lon": -113.5659960 },
+    { "lat": 53.6314488, "lon": -113.5659334 },
+    { "lat": 53.6317401, "lon": -113.5658650 },
+    { "lat": 53.6319402, "lon": -113.5658308 },
+    { "lat": 53.6322283, "lon": -113.5658011 },
+    { "lat": 53.6324459, "lon": -113.5657930 },
+    { "lat": 53.6337176, "lon": -113.5657801 }
+  ],
+  "tags": {
+    "hgv": "designated",
+    "highway": "secondary",
+    "lanes": "2",
+    "maxspeed": "60",
+    "name": "142 Street NW",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 1456798065,
+  "bounds": {
+    "minlat": 53.6279261,
+    "minlon": -113.3965245,
+    "maxlat": 53.6347256,
+    "maxlon": -113.3939063
+  },
+  "nodes": [
+    278360514,
+    33051556,
+    962037899
+  ],
+  "geometry": [
+    { "lat": 53.6279261, "lon": -113.3965245 },
+    { "lat": 53.6317812, "lon": -113.3950337 },
+    { "lat": 53.6347256, "lon": -113.3939063 }
+  ],
+  "tags": {
+    "NHS": "yes",
+    "cycleway:both": "shoulder",
+    "cycleway:left:oneway": "-1",
+    "dual_carriageway": "yes",
+    "expressway": "yes",
+    "hazmat": "designated",
+    "hgv": "designated",
+    "highway": "trunk",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "70",
+    "name": "Manning Drive NW",
+    "name:etymology:wikidata": "Q1356461",
+    "oneway": "yes",
+    "oneway:bicycle": "no",
+    "ref": "15",
+    "sidewalk": "no",
+    "surface": "asphalt",
+    "width": "7.4"
+  }
+}
+
+  ]
+}
