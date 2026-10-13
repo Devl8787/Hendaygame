@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
-import { createWorld, syncBodies } from './world.js';
+import { createWorld } from './world.js';
 import { loadTrack, poseAt, rightLaneOffset, nearestLanePose } from './track.js';
 import { Car } from './car.js';
 import { Minimap } from './minimap.js';
 import { Race } from './race.js';
+import { Hazards } from './hazards.js';
 import { readInput, onPress } from './input.js';
 
 const FIXED_DT = 1 / 60;
@@ -23,7 +24,7 @@ const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerH
 
 const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
 world.timestep = FIXED_DT;
-const { cones } = createWorld(scene, world, track);
+createWorld(scene, world, track);
 const start = track.carriageways[0];
 // Start a few metres behind the line, in the middle lane.
 const startIndex = start.closed ? start.points.length - 3 : 0;
@@ -31,6 +32,11 @@ const startPose = poseAt(start, startIndex, start.closed ? 0 : rightLaneOffset(s
 const car = new Car(scene, world, startPose);
 const minimap = new Minimap(track);
 const race = start.closed ? new Race(start) : null;
+const hazards = race ? new Hazards(scene, world, track, car) : null;
+if (race) {
+  race.onLap = (lap) => hazards.newLap(lap);
+  hazards.newRace();
+}
 document.getElementById('race-hud').hidden = !race;
 showTrackInfo(track);
 
@@ -50,6 +56,7 @@ onPress('Enter', () => {
   if (!race) return;
   car.reset(startPose);
   race.reset();
+  hazards.newRace();
 });
 
 const HOLD = { throttle: false, brake: false, steer: 0, handbrake: true };
@@ -65,6 +72,12 @@ function updateCamera(dt, snap) {
   const t = snap || cameraIndex === 1 ? 1 : 1 - Math.exp(-6 * dt);
   camera.position.lerp(camTarget, t);
   camera.lookAt(lookTarget);
+  // Potholes and grass shake the camera.
+  const shake = (hazards?.shake ?? 0) * 0.12;
+  if (shake > 0) {
+    camera.position.y += (Math.random() - 0.5) * shake;
+    camera.rotation.z += (Math.random() - 0.5) * shake * 0.3;
+  }
   // Widen the view a little with speed so 200 km/h feels fast.
   const fov = 65 + Math.min(Math.abs(car.speed) * 3.6, 200) * 0.08;
   if (Math.abs(camera.fov - fov) > 0.05) {
@@ -97,15 +110,16 @@ renderer.setAnimationLoop(() => {
   const input = race?.frozen ? HOLD : readInput();
   while (accumulator >= FIXED_DT) {
     car.update(input, FIXED_DT);
+    hazards?.step(FIXED_DT);
     world.step();
     accumulator -= FIXED_DT;
   }
 
   car.syncMeshes();
-  syncBodies(cones);
   if (race) {
     carForward.set(1, 0, 0).applyQuaternion(car.mesh.quaternion);
     race.update(frameDt, car.mesh.position, carForward, car.speed);
+    hazards.frame(frameDt, race.index);
   }
   updateCamera(frameDt, false);
   speedEl.textContent = Math.round(Math.abs(car.speed) * 3.6);

@@ -115,6 +115,7 @@ export class Race {
       return;
     }
     this.lap++;
+    this.onLap?.(this.lap);
     this.flash(`${isBest ? 'NEW BEST LAP! ' : ''}${formatTime(time)}<small>Lap ${this.lap} of ${this.laps}</small>`, 2.5);
   }
 

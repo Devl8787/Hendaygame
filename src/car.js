@@ -20,6 +20,10 @@ const TOP_SPEED = 200 / 3.6; // m/s; the engine cuts out above this
 // Air drag (N per (m/s)^2) and rolling resistance.
 const DRAG = 0.9;
 const ROLLING = 30;
+// Extra drag and less grip off the road: tops out around 90 km/h on grass.
+const GRASS_DRAG = 300;
+const ROAD_GRIP = 3.0;
+const GRASS_GRIP = 1.8;
 const REVERSE_FORCE = 2000;
 const BRAKE_FORCE = 60;
 const HANDBRAKE_FORCE = 120;
@@ -33,6 +37,7 @@ export class Car {
   // spawn: { x, z, heading } where heading turns local +x toward the direction of travel.
   constructor(scene, world, spawn) {
     this.steer = 0;
+    this.onGrass = false; // set by the game each frame
 
     this.body = world.createRigidBody(
       RAPIER.RigidBodyDesc.dynamic()
@@ -66,7 +71,7 @@ export class Car {
       this.vehicle.setWheelSuspensionRelaxation(i, 3.0);
       this.vehicle.setWheelMaxSuspensionForce(i, 100000);
       this.vehicle.setWheelMaxSuspensionTravel(i, 0.3);
-      this.vehicle.setWheelFrictionSlip(i, 3.0);
+      this.vehicle.setWheelFrictionSlip(i, ROAD_GRIP);
       this.vehicle.setWheelSideFrictionStiffness(i, 1.0);
     }
 
@@ -103,6 +108,7 @@ export class Car {
       else engine = -REVERSE_FORCE;
     }
 
+    for (let i = 0; i < 4; i++) this.vehicle.setWheelFrictionSlip(i, this.onGrass ? GRASS_GRIP : ROAD_GRIP);
     for (const i of FRONT) {
       this.vehicle.setWheelSteering(i, this.steer);
       this.vehicle.setWheelBrake(i, brake);
@@ -122,7 +128,8 @@ export class Car {
     const v = this.body.linvel();
     const speed = Math.hypot(v.x, v.y, v.z);
     if (speed < 0.01) return;
-    const k = ((DRAG * speed * speed + ROLLING * speed) * dt) / speed;
+    const rolling = this.onGrass ? ROLLING + GRASS_DRAG : ROLLING;
+    const k = ((DRAG * speed * speed + rolling * speed) * dt) / speed;
     this.body.applyImpulse({ x: -v.x * k, y: -v.y * k, z: -v.z * k }, true);
   }
 
@@ -157,9 +164,10 @@ export class Car {
   }
 }
 
-function buildCarMesh() {
+// Also used for traffic. `car.userData.headlights` is the headlight material.
+export function buildCarMesh(color = 0xc8102e) {
   const car = new THREE.Group();
-  const paint = new THREE.MeshStandardMaterial({ color: 0xc8102e, metalness: 0.3, roughness: 0.4 });
+  const paint = new THREE.MeshStandardMaterial({ color, metalness: 0.3, roughness: 0.4 });
   const glass = new THREE.MeshStandardMaterial({ color: 0x1a2733, metalness: 0.8, roughness: 0.1 });
   const light = new THREE.MeshStandardMaterial({ color: 0xfff6d0, emissive: 0xfff2b0, emissiveIntensity: 0.6 });
   const tail = new THREE.MeshStandardMaterial({ color: 0x990000, emissive: 0xff0000, emissiveIntensity: 0.4 });
@@ -182,8 +190,26 @@ function buildCarMesh() {
     car.add(head, back);
   }
   car.traverse((o) => (o.castShadow = true));
+  car.userData.headlights = light;
   return car;
 }
+
+// Wheels on the ground for a car body built by buildCarMesh (traffic doesn't spin them).
+export function addStaticWheels(car) {
+  for (const [x, z] of WHEEL_POSITIONS) {
+    const wheel = buildWheelMesh();
+    wheel.position.set(x, WHEEL.radius - CAR_SIZE.rideHeight, z);
+    car.add(wheel);
+  }
+  return car;
+}
+
+export const CAR_SIZE = {
+  halfLength: CHASSIS.halfLength,
+  halfWidth: CHASSIS.halfWidth,
+  // Height of the chassis centre above the road once the springs settle (measured).
+  rideHeight: 0.91,
+};
 
 function buildWheelMesh() {
   const wheel = new THREE.Group();

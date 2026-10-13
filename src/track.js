@@ -157,6 +157,8 @@ function prepare(track, isTestStrip) {
     }
     c.widths = taperedWidths(pts, c.closed);
     c.width = (i) => c.widths[i];
+    const [lx, lz] = pts[n - 1];
+    c.totalLength = c.distance[n - 1] + (c.closed ? Math.hypot(pts[0][0] - lx, pts[0][1] - lz) : 0);
   }
   track.isTestStrip = isTestStrip;
   return track;
@@ -195,6 +197,42 @@ export function poseAt(carriageway, i, offset = 0) {
     // Rotation about y that turns the car's local +x onto the tangent.
     heading: Math.atan2(-tz, tx),
   };
+}
+
+// Pose at `distance` metres along a closed carriageway (wrapping around),
+// smoothly between points, shifted sideways by `offset`.
+export function sampleAt(c, distance, offset = 0) {
+  const n = c.points.length;
+  const d = ((distance % c.totalLength) + c.totalLength) % c.totalLength;
+  // Binary search for the last point at or before d.
+  let lo = 0;
+  let hi = n - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (c.distance[mid] <= d) lo = mid;
+    else hi = mid - 1;
+  }
+  const i = lo;
+  const j = (i + 1) % n;
+  const segment = (j === 0 ? c.totalLength : c.distance[j]) - c.distance[i];
+  const f = segment > 0 ? (d - c.distance[i]) / segment : 0;
+  const lerp = (a, b) => a + (b - a) * f;
+  let tx = lerp(c.tangents[i * 2], c.tangents[j * 2]);
+  let tz = lerp(c.tangents[i * 2 + 1], c.tangents[j * 2 + 1]);
+  const len = Math.hypot(tx, tz) || 1;
+  tx /= len;
+  tz /= len;
+  return {
+    x: lerp(c.points[i][0], c.points[j][0]) - tz * offset,
+    z: lerp(c.points[i][1], c.points[j][1]) + tx * offset,
+    heading: Math.atan2(-tz, tx),
+    index: i,
+  };
+}
+
+// Sideways offset of the centre of lane `lane` (0 = left/median lane).
+export function laneOffset(c, i, lane) {
+  return -c.width(i) / 2 + (lane + 0.5) * LANE_WIDTH;
 }
 
 // Pose in the right-hand lane of the carriageway closest to (x, z).

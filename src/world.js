@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { LANE_WIDTH, poseAt } from './track.js';
 
-const LEFT_SHOULDER = 1;
-const RIGHT_SHOULDER = 2.5;
+export const LEFT_SHOULDER = 1;
+export const RIGHT_SHOULDER = 2.5;
 const LINE_WIDTH = 0.15;
 const POLE_EVERY = 60; // metres
 
@@ -23,7 +23,6 @@ export function createWorld(scene, world, track) {
   track.carriageways.forEach((c) => addCarriageway(scene, c));
   addLightPoles(scene, track);
   if (track.carriageways[0].closed) addStartFinish(scene, track.carriageways[0]);
-  return { cones: addLaneClosure(scene, world, track.carriageways[0]) };
 }
 
 function addLights(scene) {
@@ -271,31 +270,3 @@ function bannerMaterials() {
   return [sign, sign, green, green, green, green];
 }
 
-// Cones closing the right-hand lane a few hundred metres past the start:
-// the first taste of Henday construction season. You can knock them over.
-function addLaneClosure(scene, world, c) {
-  const geo = new THREE.ConeGeometry(0.2, 0.7, 12);
-  const mat = new THREE.MeshStandardMaterial({ color: 0xff6a00 });
-  const start = Math.min(100, c.points.length - 40);
-  const cones = [];
-  for (let k = 0; k < 12; k++) {
-    const i = start + k * 2;
-    // Taper from the right edge in to the lane line.
-    const offset = c.width(i) / 2 - 0.3 - (k / 11) * (LANE_WIDTH - 0.6);
-    const p = poseAt(c, i, offset);
-    const body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(p.x, 0.35, p.z));
-    world.createCollider(RAPIER.ColliderDesc.cone(0.35, 0.2).setDensity(40), body);
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.castShadow = true;
-    scene.add(mesh);
-    cones.push({ body, mesh });
-  }
-  return cones;
-}
-
-export function syncBodies(items) {
-  for (const { body, mesh } of items) {
-    mesh.position.copy(body.translation());
-    mesh.quaternion.copy(body.rotation());
-  }
-}
