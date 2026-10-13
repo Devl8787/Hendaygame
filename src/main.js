@@ -24,13 +24,13 @@ const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerH
 
 const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
 world.timestep = FIXED_DT;
-createWorld(scene, world, track);
+const { terrain } = createWorld(scene, world, track);
 const start = track.carriageways[0];
 // Start a few metres behind the line, in the middle lane.
 const startIndex = start.closed ? start.points.length - 3 : 0;
 const startPose = poseAt(start, startIndex, start.closed ? 0 : rightLaneOffset(start, 0));
 const car = new Car(scene, world, startPose);
-const minimap = new Minimap(track);
+const minimap = new Minimap(track, terrain?.river);
 const race = start.closed ? new Race(start) : null;
 const hazards = race ? new Hazards(scene, world, track, car) : null;
 if (race) {

@@ -1,28 +1,40 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { LANE_WIDTH, poseAt } from './track.js';
+import { Terrain } from './terrain.js';
 
 export const LEFT_SHOULDER = 1;
 export const RIGHT_SHOULDER = 2.5;
 const LINE_WIDTH = 0.15;
 const POLE_EVERY = 60; // metres
 
-// The ground, asphalt and paint are flat layers only centimetres apart, which
-// some GPUs can't separate by depth, so the grass would flicker through the road.
-// Instead they skip the depth buffer and are drawn in a fixed order, bottom up.
-const LAYER = { grass: -3, asphalt: -2, paint: -1 };
-function groundLayer(mesh, layer) {
-  mesh.material.depthWrite = false;
-  mesh.renderOrder = layer;
+// Asphalt, paint and potholes lie only centimetres above the ground, closer
+// than some GPUs can tell apart by depth. Polygon offset nudges each layer
+// toward the camera by whole depth-buffer steps instead, so ground < asphalt
+// < paint < decals holds at any depth precision (and on hills and bridges).
+export const LAYER = { asphalt: 1, paint: 2, decal: 3 };
+export function groundLayer(mesh, level) {
+  const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  for (const m of materials) {
+    m.polygonOffset = true;
+    m.polygonOffsetFactor = -level;
+    m.polygonOffsetUnits = -level * 2;
+    m.depthWrite = level === LAYER.asphalt;
+  }
+  mesh.renderOrder = level - 4;
   return mesh;
 }
 
+// Returns the terrain (with the river line) when the track has a river valley.
 export function createWorld(scene, world, track) {
   addLights(scene);
-  addGround(scene, world, track);
+  const terrain = addGround(scene, world, track);
+  if (terrain) markBridges(track, terrain);
   track.carriageways.forEach((c) => addCarriageway(scene, c));
+  if (terrain) track.carriageways.forEach((c) => addBridgeStructures(scene, world, c, terrain));
   addLightPoles(scene, track);
   if (track.carriageways[0].closed) addStartFinish(scene, track.carriageways[0]);
+  return { terrain };
 }
 
 function addLights(scene) {
@@ -47,26 +59,123 @@ function addLights(scene) {
 }
 
 function addGround(scene, world, track) {
-  // Size the ground to the track, with a couple of km to spare.
   let extent = 0;
   for (const c of track.carriageways) {
     for (const [x, z] of c.points) extent = Math.max(extent, Math.abs(x), Math.abs(z));
   }
-  const half = extent + 2000;
+  if (track.river) {
+    const terrain = new Terrain(track.river, extent);
+    terrain.build(scene, world);
+    return terrain;
+  }
 
+  // No river (test strip, or the full-length loop): flat ground with a couple
+  // of km to spare.
+  const half = extent + 2000;
   const grass = new THREE.Mesh(
     new THREE.PlaneGeometry(half * 2, half * 2),
-    new THREE.MeshStandardMaterial({ color: 0x6f8f45 }),
+    new THREE.MeshStandardMaterial({ color: 0x6f8f45, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
   );
   grass.rotation.x = -Math.PI / 2;
   grass.receiveShadow = true;
-  scene.add(groundLayer(grass, LAYER.grass));
-
-  // The road is painted onto one big flat collider. Hills and bridges come later.
-  world.createCollider(
-    RAPIER.ColliderDesc.cuboid(half, 0.5, half).setTranslation(0, -0.5, 0).setFriction(1.0),
-  );
+  scene.add(grass);
+  world.createCollider(RAPIER.ColliderDesc.cuboid(half, 0.5, half).setTranslation(0, -0.5, 0).setFriction(1.0));
+  return null;
 }
+
+// Flags every road point that crosses the valley as bridge (point[3] = 1),
+// plus a run-on at each end so the guardrails start well before the drop.
+function markBridges(track, terrain) {
+  const RUN_ON = 20; // points (~60 m)
+  for (const c of track.carriageways) {
+    const n = c.points.length;
+    const over = c.points.map((_, i) => {
+      const reach = c.width(i) / 2 + RIGHT_SHOULDER;
+      return [-reach, 0, reach].some((offset) => {
+        const p = poseAt(c, i, offset);
+        return terrain.heightAt(p.x, p.z) < -0.25;
+      });
+    });
+    for (let i = 0; i < n; i++) {
+      let bridge = false;
+      for (let k = -RUN_ON; k <= RUN_ON && !bridge; k++) bridge = over[(i + k + n) % n];
+      c.points[i][3] = bridge ? 1 : 0;
+    }
+  }
+}
+
+// Bridge deck, piers and barriers you can't drive through, for every bridge run.
+const DECK_SEGMENT = 6; // points per deck piece (~18 m)
+const PIER_EVERY = 10; // points (~30 m)
+function addBridgeStructures(scene, world, c, terrain) {
+  const n = c.points.length;
+  const concrete = new THREE.MeshStandardMaterial({ color: 0xb9b6ad, roughness: 0.9 });
+  const deckDepth = 1.2;
+  const left = (i) => -c.width(i) / 2 - LEFT_SHOULDER;
+  const right = (i) => c.width(i) / 2 + RIGHT_SHOULDER;
+  const fixed = (x, y, z, heading, desc) => {
+    const body = world.createRigidBody(
+      RAPIER.RigidBodyDesc.fixed()
+        .setTranslation(x, y, z)
+        .setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, heading)),
+    );
+    world.createCollider(desc, body);
+  };
+
+  for (let i = 0; i < n; i += DECK_SEGMENT) {
+    const j = Math.min(i + DECK_SEGMENT, c.closed ? n : n - 1) % n;
+    if (c.points[i][3] !== 1 && c.points[j][3] !== 1) continue;
+    // A deck piece from point i to point j, as wide as the road and shoulders.
+    const a = poseAt(c, i, (left(i) + right(i)) / 2);
+    const b = poseAt(c, j, (left(j) + right(j)) / 2);
+    const length = Math.hypot(b.x - a.x, b.z - a.z) + 0.6;
+    const heading = Math.atan2(-(b.z - a.z), b.x - a.x);
+    const halfWidth = (right(i) - left(i)) / 2;
+    const mx = (a.x + b.x) / 2;
+    const mz = (a.z + b.z) / 2;
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(length, deckDepth, halfWidth * 2), concrete);
+    deck.position.set(mx, -deckDepth / 2, mz);
+    deck.rotation.y = heading;
+    deck.castShadow = deck.receiveShadow = true;
+    scene.add(deck);
+    fixed(mx, -deckDepth / 2, mz, heading, RAPIER.ColliderDesc.cuboid(length / 2, deckDepth / 2, halfWidth));
+    // Guardrails along both edges (the visible walls come from addBridgeBarriers).
+    // Rounded and overlapping at the joints so a car glances off instead of
+    // snagging on a corner where two straight pieces meet on a curve.
+    for (const side of [-1, 1]) {
+      const ox = Math.sin(heading) * side * (halfWidth - 0.15);
+      const oz = Math.cos(heading) * side * (halfWidth - 0.15);
+      const body = world.createRigidBody(
+        RAPIER.RigidBodyDesc.fixed()
+          .setTranslation(mx + ox, 0.75, mz + oz)
+          .setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, heading).multiply(LYING_DOWN)),
+      );
+      world.createCollider(RAPIER.ColliderDesc.capsule(length / 2, 0.3), body);
+    }
+  }
+
+  // Piers down to the valley floor, wherever the ground has dropped away.
+  const pierGeo = new THREE.CylinderGeometry(0.7, 0.8, 1, 12);
+  for (let i = 0; i < n; i += PIER_EVERY) {
+    if (c.points[i][3] !== 1) continue;
+    for (const offset of [left(i) + 2, right(i) - 2]) {
+      const p = poseAt(c, i, offset);
+      const ground = terrain.heightAt(p.x, p.z);
+      const height = -deckDepth - ground;
+      if (height < 2) continue;
+      const pier = new THREE.Mesh(pierGeo, concrete);
+      pier.scale.y = height;
+      pier.position.set(p.x, ground + height / 2, p.z);
+      pier.castShadow = true;
+      scene.add(pier);
+      fixed(p.x, ground + height / 2, p.z, 0, RAPIER.ColliderDesc.cylinder(height / 2, 0.8));
+    }
+  }
+}
+
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
+// Turns a capsule (which stands along y) to lie along the road (x).
+const LYING_DOWN = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
 
 function addCarriageway(scene, c) {
   const y = 0.02;

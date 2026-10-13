@@ -53,8 +53,14 @@ infield or reversing over the line doesn't count. Your best lap is saved in the
 browser.
 
 Hazards: traffic (including semis and a left-lane camper), wrong-way drivers
-that line up on your lane (one more every lap), potholes, work zones with a
-crew and an excavator that move every lap, and grass that slows you to ~90 km/h.
+that line up on your lane (one more every lap), potholes, frost heaves that
+give you air, work zones with a crew and an excavator that move every lap, and
+grass that slows you to ~90 km/h.
+
+The North Saskatchewan river valley crosses the loop where the real Henday
+crosses it, in the south-west and north-east (the longest bridges in the
+OpenStreetMap data), with twin bridges on piers. Everywhere else is flat
+prairie, like the real thing.
 
 ## How it fits together
 
@@ -67,6 +73,7 @@ crew and an excavator that move every lap, and grass that slows you to ~90 km/h.
 | `src/race.js` | Countdown, laps, checkpoints, lap timer, best lap, wrong-way warning. |
 | `src/hazards.js` | Traffic and its lane-changing AI, wrong-way drivers, potholes, moving lane closures, grass. |
 | `src/construction.js` | Work zones: sign, arrow board, cones, barriers, excavator and crew. |
+| `src/terrain.js` | The river valley: ground mesh, physics heightfield and water. |
 | `scripts/fetch-henday.mjs` | Downloads the Henday from OpenStreetMap's Overpass API. |
 | `scripts/osm-to-track.mjs` | Stitches the OpenStreetMap road pieces into one loop per direction, in metres. |
 | `src/car.js` | The car: a Rapier ray-cast vehicle (box chassis + 4 spring wheels), engine, brakes, steering, drag. |
@@ -81,7 +88,7 @@ then copied to its body's position and rotation.
 2. ✅ Import the real Henday route from OpenStreetMap
 3. ✅ Laps, checkpoints and a timer (on a ~4 km scaled-down Henday)
 4. ✅ Hazards: potholes, road closures, traffic, wrong-way drivers
-5. Hills: the south-west and north-east river valleys, frost heaves, overpasses
+5. ✅ Hills: the south-west and north-east river valleys, frost heaves (overpasses still to come)
 6. Music and sound
 7. Graphics pass: textures, lighting, real models (Blender / free assets)
 8. Optional Google Photorealistic 3D Tiles for scenery

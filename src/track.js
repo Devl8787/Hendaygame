@@ -54,7 +54,58 @@ function compress(track, lapLength) {
       { name: 'Clockwise', closed: true, length: Math.round(loopLength(along)), points: toPoints(along) },
       { name: 'Counter-clockwise', closed: true, length: Math.round(loopLength(against)), points: toPoints(against) },
     ],
+    river: riverCrossings(source, centre),
   };
+}
+
+// Where the North Saskatchewan crosses the loop, on the shrunk centre line.
+// The river bridges are the longest bridge on each side (west / east) of the
+// real loop; without bridge data we fall back to the south-west and north-east.
+function riverCrossings(source, centre) {
+  const pts = source.points;
+  const n = pts.length;
+  const along = [0];
+  for (let i = 1; i < n; i++) along.push(along[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const total = along[n - 1];
+  const [cx] = centroid(pts);
+
+  const runs = [];
+  for (let i = 0, start = -1; i <= n; i++) {
+    const bridge = i < n && pts[i][3] === 1;
+    if (bridge && start < 0) start = i;
+    if (!bridge && start >= 0) {
+      runs.push({ length: along[i - 1] - along[start], mid: Math.floor((start + i - 1) / 2) });
+      start = -1;
+    }
+  }
+  const longest = (west) =>
+    runs
+      .filter((r) => r.length > 200 && pts[r.mid][0] < cx === west)
+      .sort((a, b) => b.length - a.length)[0];
+
+  // Compass angles (0 = east, 90 = north) for the fallback.
+  const fallback = { true: -135, false: 45 };
+  return [true, false].map((west) => {
+    const run = longest(west);
+    let i;
+    if (run) {
+      i = Math.round((along[run.mid] / total) * centre.length) % centre.length;
+    } else {
+      const want = (fallback[west] * Math.PI) / 180;
+      let best = Infinity;
+      centre.forEach(([x, z], k) => {
+        const diff = Math.abs(Math.atan2(Math.sin(Math.atan2(-z, x) - want), Math.cos(Math.atan2(-z, x) - want)));
+        if (diff < best) {
+          best = diff;
+          i = k;
+        }
+      });
+    }
+    const prev = centre[(i - 1 + centre.length) % centre.length];
+    const next = centre[(i + 1) % centre.length];
+    const len = Math.hypot(next[0] - prev[0], next[1] - prev[1]) || 1;
+    return { x: centre[i][0], z: centre[i][1], tx: (next[0] - prev[0]) / len, tz: (next[1] - prev[1]) / len };
+  });
 }
 
 function loopLength(pts) {

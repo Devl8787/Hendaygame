@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { LANE_WIDTH, sampleAt } from './track.js';
+import { groundLayer, LAYER } from './world.js';
 
 // A Henday work zone closing one outside lane (0 = median side, 2 = right):
 // a sign well before it, a flashing arrow board, a cone taper, concrete
@@ -26,7 +27,7 @@ const MATS = {
   hatWhite: mat(0xf4f4f4, { roughness: 0.4 }),
   hatYellow: mat(0xf2d200, { roughness: 0.4 }),
   dirt: mat(0x6b4f33, { roughness: 1 }),
-  hole: mat(0x1d1712, { roughness: 1, depthWrite: false }),
+  hole: mat(0x1d1712, { roughness: 1 }),
   steel: mat(0x9aa0a6, { metalness: 0.6, roughness: 0.4 }),
   cup: mat(0xf2f2f2),
 };
@@ -59,7 +60,7 @@ export function buildWorkZone(scene, world, c, s, lane) {
   };
 
   // Warning sign on the shoulder, well before the work.
-  place(buildSign(), -180, edge * (half + 2.2));
+  place(buildDiamondSign(['ROAD', 'WORK', 'AHEAD'], '#ff8a00'), -180, edge * (half + 2.2));
 
   // Cone taper from the outer edge in to the lane line.
   const coneGeo = new THREE.ConeGeometry(0.2, 0.7, 12);
@@ -101,7 +102,7 @@ export function buildWorkZone(scene, world, c, s, lane) {
   hole.geometry.rotateX(-Math.PI / 2);
   hole.scale.set(1.6, 1, 1);
   hole.position.y = 0.06;
-  hole.renderOrder = -0.5; // paint layer (see world.js)
+  groundLayer(hole, LAYER.decal);
   place(hole, 96, laneMid);
   const pile = new THREE.Mesh(new THREE.ConeGeometry(1.4, 1.1, 10), MATS.dirt);
   pile.position.y = 0.55;
@@ -237,15 +238,16 @@ function buildArrowBoard(edge) {
   return { group, lights };
 }
 
-// Orange diamond "ROAD WORK AHEAD" sign on a post (plain orange without a DOM).
-function buildSign() {
+// Diamond warning sign on a post, e.g. ROAD WORK AHEAD (orange) or BUMP
+// (yellow). Plain coloured without a DOM.
+export function buildDiamondSign(words, fill) {
   const group = new THREE.Group();
   const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.4, 0.1), MATS.steel);
   post.position.y = 1.2;
   group.add(post);
   const size = 1.8;
   if (typeof document === 'undefined') {
-    const panel = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.3, 1.3), mat(0xff8a00));
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.3, 1.3), mat(new THREE.Color(fill).getHex()));
     panel.position.y = 2.6;
     panel.rotation.x = Math.PI / 4;
     group.add(panel);
@@ -268,16 +270,18 @@ function buildSign() {
     return new THREE.MeshStandardMaterial({ map: texture, alphaTest: 0.5 });
   };
   const front = face((ctx) => {
-    ctx.fillStyle = '#ff8a00';
+    ctx.fillStyle = fill;
     ctx.fill();
     ctx.lineWidth = 8;
     ctx.strokeStyle = '#111';
     ctx.stroke();
     ctx.fillStyle = '#111';
-    ctx.font = 'bold 34px system-ui, sans-serif';
+    const size = words.length === 1 ? 52 : 34;
+    ctx.font = `bold ${size}px system-ui, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ['ROAD', 'WORK', 'AHEAD'].forEach((word, i) => ctx.fillText(word, 128, 92 + i * 36));
+    const top = 128 - ((words.length - 1) * 36) / 2;
+    words.forEach((word, i) => ctx.fillText(word, 128, top + i * 36));
   });
   const back = face((ctx) => {
     ctx.fillStyle = '#8a8f96';

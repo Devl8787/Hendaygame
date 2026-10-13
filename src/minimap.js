@@ -3,7 +3,8 @@ const SIZE = 200;
 const PADDING = 12;
 
 export class Minimap {
-  constructor(track) {
+  // river: optional [[x, z], ...] line to draw in blue under the road.
+  constructor(track, river) {
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'minimap';
     const dpr = Math.min(window.devicePixelRatio, 2);
@@ -34,8 +35,24 @@ export class Minimap {
     this.background.width = this.background.height = SIZE * dpr;
     const bg = this.background.getContext('2d');
     bg.scale(dpr, dpr);
-    bg.lineWidth = 3;
     bg.lineJoin = 'round';
+    if (river) {
+      bg.save();
+      bg.beginPath();
+      bg.rect(0, 0, SIZE, SIZE);
+      bg.clip();
+      bg.lineWidth = 4;
+      bg.strokeStyle = '#5c9bd6';
+      bg.beginPath();
+      river.forEach(([x, z], i) => {
+        const [mx, my] = this.toMap(x, z);
+        if (i === 0) bg.moveTo(mx, my);
+        else bg.lineTo(mx, my);
+      });
+      bg.stroke();
+      bg.restore();
+    }
+    bg.lineWidth = 3;
     bg.strokeStyle = '#e8e8e8';
     for (const c of track.carriageways) {
       bg.beginPath();

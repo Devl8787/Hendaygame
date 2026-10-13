@@ -2,13 +2,16 @@ import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { LANE_WIDTH, sampleAt } from './track.js';
 import { buildCarMesh, addStaticWheels, CAR_SIZE } from './car.js';
-import { LEFT_SHOULDER, RIGHT_SHOULDER } from './world.js';
-import { buildWorkZone, removeWorkZone, animateWorkZone } from './construction.js';
+import { LEFT_SHOULDER, RIGHT_SHOULDER, groundLayer, LAYER } from './world.js';
+import { buildWorkZone, removeWorkZone, animateWorkZone, buildDiamondSign } from './construction.js';
 
 // Everything that makes the Henday the Henday: traffic, wrong-way drivers,
 // potholes, lane closures that move every lap, and grass that slows you down.
 
 const POTHOLES = 14;
+const FROST_HEAVES = 5;
+const HEAVE_HEIGHT = 0.22; // metres
+const HEAVE_LENGTH = 7; // metres along the road
 const CLOSURES_PER_LAP = 2;
 const TRAFFIC = 10; // our direction
 const SEMIS = 2; // of the traffic above
@@ -33,6 +36,13 @@ const POTHOLE_LINES = [
   "Edmonton's official speed bump.",
   "It's been there since 2016.",
   'The city has been notified. Again.',
+];
+
+const FROST_HEAVE_LINES = [
+  "FROST HEAVE! Edmonton's natural ski jump.",
+  'FROST HEAVE! Free airtime, courtesy of winter.',
+  'FROST HEAVE! Your coffee is now on the ceiling.',
+  'FROST HEAVE! The road is doing the wave.',
 ];
 
 const CONSTRUCTION_LINES = [
@@ -62,6 +72,7 @@ export class Hazards {
 
     this.vehicles = [];
     this.potholes = [];
+    this.heaves = [];
     this.closures = [];
     this.lap = 1;
     this.shake = 0;
@@ -76,6 +87,7 @@ export class Hazards {
     this.clear();
     this.lap = 1;
     this.placePotholes();
+    this.placeFrostHeaves();
     this.placeClosures(0);
     this.spawnTraffic();
     this.spawnWrongWay(1);
@@ -93,9 +105,14 @@ export class Hazards {
   clear() {
     for (const v of this.vehicles) this.removeBody(v);
     for (const p of this.potholes) this.scene.remove(p.mesh);
+    for (const h of this.heaves) {
+      this.world.removeRigidBody(h.body);
+      for (const object of h.objects) this.scene.remove(object);
+    }
     this.removeClosures();
     this.vehicles = [];
     this.potholes = [];
+    this.heaves = [];
   }
 
   removeBody(item) {
@@ -106,8 +123,8 @@ export class Hazards {
   // ---------------------------------------------------------------- potholes
 
   placePotholes() {
-    const rim = new THREE.MeshStandardMaterial({ color: 0x55534f, roughness: 1, depthWrite: false });
-    const hole = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 1, depthWrite: false });
+    const rim = new THREE.MeshStandardMaterial({ color: 0x55534f, roughness: 1 });
+    const hole = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 1 });
     for (let k = 0; k < POTHOLES; k++) {
       const s = this.randomS();
       const lane = randInt(0, 2);
@@ -116,9 +133,9 @@ export class Hazards {
       const mesh = new THREE.Group();
       const outer = new THREE.Mesh(blobGeometry(r * 1.25), rim);
       const inner = new THREE.Mesh(blobGeometry(r), hole);
-      // Paint layer order (see world.js): drawn over the asphalt, rim first.
-      outer.renderOrder = -1;
-      inner.renderOrder = -0.5;
+      // Drawn over the asphalt, rim first (see groundLayer in world.js).
+      groundLayer(outer, LAYER.paint);
+      groundLayer(inner, LAYER.decal);
       outer.receiveShadow = inner.receiveShadow = true;
       mesh.add(outer, inner);
       mesh.position.set(pose.x, 0.05, pose.z);
@@ -151,6 +168,76 @@ export class Hazards {
     body.setLinvel({ x: v.x * 0.88, y: v.y, z: v.z * 0.88 }, true);
     this.shake = 1;
     this.toast(`POTHOLE! ${pick(POTHOLE_LINES)}`, 2.2);
+  }
+
+  // ------------------------------------------------------------ frost heaves
+
+  // Humps across our carriageway: the top of a huge cylinder buried under the
+  // road, so wheels roll over a smooth curve. Hit one fast and you get air.
+  placeFrostHeaves() {
+    const c = this.ours;
+    const radius = (HEAVE_LENGTH ** 2 / 4 + HEAVE_HEIGHT ** 2) / (2 * HEAVE_HEIGHT);
+    const patch = new THREE.MeshStandardMaterial({ color: 0x47484b, roughness: 0.95 });
+    const crack = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 1 });
+    for (let k = 0; k < FROST_HEAVES; k++) {
+      let s;
+      for (let tries = 0; tries < 100; tries++) {
+        s = this.randomS();
+        const nearBridge = [-30, 0, 30].some((d) => c.points[sampleAt(c, s + d).index][3] === 1);
+        const crowded = this.heaves.some((h) => Math.min(gap(this.length, h.s, s), gap(this.length, s, h.s)) < 300);
+        if (!nearBridge && !crowded) break;
+      }
+      const centreOffset = (RIGHT_SHOULDER - LEFT_SHOULDER) / 2;
+      const halfAcross = (c.width(0) + LEFT_SHOULDER + RIGHT_SHOULDER) / 2;
+      const pose = sampleAt(c, s, centreOffset);
+      const heading = new THREE.Quaternion().setFromAxisAngle(Y_AXIS, pose.heading);
+
+      // Physics: cylinder axis (local y) turned to run across the road.
+      const body = this.world.createRigidBody(
+        RAPIER.RigidBodyDesc.fixed()
+          .setTranslation(pose.x, HEAVE_HEIGHT - radius, pose.z)
+          .setRotation(heading.clone().multiply(ACROSS_ROAD)),
+      );
+      this.world.createCollider(RAPIER.ColliderDesc.cylinder(halfAcross, radius).setFriction(1), body);
+
+      // Visible hump: a strip following the same curve, in road-local axes.
+      const positions = [];
+      const steps = 28;
+      for (let j = 0; j <= steps; j++) {
+        const d = -HEAVE_LENGTH / 2 + (HEAVE_LENGTH * j) / steps;
+        const y = Math.max(0, Math.sqrt(radius * radius - d * d) - (radius - HEAVE_HEIGHT)) + 0.03;
+        positions.push(d, y, -halfAcross, d, y, halfAcross);
+      }
+      const indices = [];
+      for (let j = 0; j < steps; j++) {
+        const a = j * 2;
+        indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geo.setIndex(indices);
+      geo.computeVertexNormals();
+      const hump = groundLayer(new THREE.Mesh(geo, patch), LAYER.paint);
+      hump.material.depthWrite = true;
+      hump.receiveShadow = true;
+      const split = groundLayer(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.01, halfAcross * 1.6), crack), LAYER.decal);
+      split.position.set(0.2, HEAVE_HEIGHT + 0.035, 0);
+      split.rotation.y = 0.08;
+      const group = new THREE.Group();
+      group.add(hump, split);
+      group.position.set(pose.x, 0, pose.z);
+      group.quaternion.copy(heading);
+      this.scene.add(group);
+
+      // Yellow BUMP sign on the right shoulder, 120 m before.
+      const signPose = sampleAt(c, s - 120, c.width(0) / 2 + RIGHT_SHOULDER + 1);
+      const sign = buildDiamondSign(['BUMP'], '#f2c200');
+      sign.position.set(signPose.x, 0, signPose.z);
+      sign.quaternion.setFromAxisAngle(Y_AXIS, signPose.heading);
+      this.scene.add(sign);
+
+      this.heaves.push({ s, body, objects: [group, sign], announced: false });
+    }
   }
 
   // ---------------------------------------------------------------- closures
@@ -414,6 +501,7 @@ export class Hazards {
     if (this.car.onGrass) this.shake = Math.max(this.shake, Math.min(speed / 40, 0.5));
 
     this.checkPotholes(dt);
+    this.checkFrostHeaves(speed);
     this.radioChatter();
 
     const time = performance.now() / 1000;
@@ -430,6 +518,19 @@ export class Hazards {
 
     this.shake = Math.max(0, this.shake - dt * 2.5);
     if (this.toastTimer > 0 && (this.toastTimer -= dt) <= 0) this.toastEl.textContent = '';
+  }
+
+  checkFrostHeaves(speed) {
+    for (const h of this.heaves) {
+      const past = gap(this.length, h.s, this.playerS);
+      if (!h.announced && past < 6 && speed > 20 && !this.car.onGrass) {
+        h.announced = true;
+        this.shake = Math.max(this.shake, 0.6);
+        this.toast(pick(FROST_HEAVE_LINES), 2.5);
+      } else if (past > 300 && past < this.length - 300) {
+        h.announced = false;
+      }
+    }
   }
 
   onRoad(c, i, pos) {
@@ -505,6 +606,8 @@ export class Hazards {
 }
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
+// Turns a cylinder (which stands along y) to run across the road (z).
+const ACROSS_ROAD = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
 
 // Whether vehicle o is in, or moving into, `lane`.
 function inLane(o, lane, tolerance) {
