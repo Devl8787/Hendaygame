@@ -57,6 +57,7 @@ export class Race {
       if (this.clock >= 0) {
         this.state = 'racing';
         this.flash('GO!', 1);
+        this.onStart?.();
       }
       this.render();
       return;
@@ -107,6 +108,7 @@ export class Race {
 
     if (this.lap === this.laps) {
       this.state = 'finished';
+      this.onFinish?.();
       const total = this.lapTimes.reduce((a, b) => a + b, 0);
       this.flash(
         `FINISHED! ${formatTime(total)}<small>Best lap ${formatTime(Math.min(...this.lapTimes))} · Enter to race again</small>`,

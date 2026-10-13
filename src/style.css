@@ -120,3 +120,28 @@ canvas {
   font-weight: 700;
   color: #ffd34d;
 }
+
+#radio {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  max-width: min(720px, calc(100% - 520px));
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.35;
+  color: #e9f3ff;
+}
+
+#radio:not(:empty) {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(15, 25, 40, 0.65);
+}
+
+@media (max-width: 900px) {
+  #radio {
+    max-width: calc(100% - 32px);
+    bottom: 230px;
+  }
+}

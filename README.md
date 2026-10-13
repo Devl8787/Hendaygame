@@ -47,6 +47,7 @@ Road data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributo
 | R | Put the car back on the road, facing the race direction (automatic if you're upside down) |
 | C | Switch chase / driver camera |
 | Enter | Restart the race |
+| M | Mute / unmute Henday Traffic Radio |
 
 A race is 3 laps. The loop is split into checkpoints, so cutting across the
 infield or reversing over the line doesn't count. Your best lap is saved in the
@@ -56,6 +57,11 @@ Hazards: traffic (including semis and a left-lane camper), wrong-way drivers
 that line up on your lane (one more every lap), potholes, one giant frost
 heave on the straightest stretch (about a second of air at 200 km/h), work zones with a crew and an excavator that move every lap, and
 grass that slows you to ~90 km/h.
+
+**Henday Traffic Radio 2-16**: your host Brenda reports on wrong-way drivers,
+work zones, potholes, airtime and tow trucks, with traffic chatter in between.
+She uses your browser's built-in voice; Microsoft Edge has the most natural
+ones (including a Canadian voice). Press M to mute her.
 
 The North Saskatchewan river valley crosses the loop where the real Henday
 crosses it, in the south-west and north-east (the longest bridges in the
@@ -77,6 +83,7 @@ ramp is barricaded: EXIT CLOSED.
 | `src/world.js` | Builds the scenery from the track: asphalt, lane lines, bridge barriers, light poles, knock-over cones. |
 | `src/minimap.js` | The map in the corner. |
 | `src/race.js` | Countdown, laps, checkpoints, lap timer, best lap, wrong-way warning. |
+| `src/radio.js` | Henday Traffic Radio 2-16: Brenda's lines, voice, jingle and static. |
 | `src/hazards.js` | Traffic and its lane-changing AI, wrong-way drivers, potholes, moving lane closures, grass. |
 | `src/construction.js` | Work zones: sign, arrow board, cones, barriers, excavator and crew. |
 | `src/terrain.js` | The river valley and road cuttings: ground mesh, physics heightfield and water. |
@@ -97,6 +104,6 @@ then copied to its body's position and rotation.
 4. ✅ Hazards: potholes, road closures, traffic, wrong-way drivers
 5. ✅ Hills: the south-west and north-east river valleys, a giant frost heave
 6. ✅ Interchanges: overpasses, underpasses and closed exits
-7. Music and sound
+7. Sound: ✅ Henday Traffic Radio (browser voice); still to come: recorded voice, engine sounds, music
 8. Graphics pass: textures, lighting, real models (Blender / free assets)
 9. Optional Google Photorealistic 3D Tiles for scenery

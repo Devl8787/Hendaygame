@@ -78,6 +78,7 @@ export class Hazards {
     this.shake = 0;
     this.toastTimer = 0;
     this.toastEl = document.getElementById('toast');
+    this.radio = null; // Henday Traffic Radio, if the game has one
     this.theirIndex = -1;
     this.playerS = 0;
   }
@@ -168,6 +169,7 @@ export class Hazards {
     body.setLinvel({ x: v.x * 0.88, y: v.y, z: v.z * 0.88 }, true);
     this.shake = 1;
     this.toast(`POTHOLE! ${pick(POTHOLE_LINES)}`, 2.2);
+    this.radio?.event('pothole');
   }
 
   // ------------------------------------------------------------ frost heaves
@@ -549,6 +551,7 @@ export class Hazards {
       if (!zone.announced && gap(this.length, this.playerS, zone.s) < 280) {
         zone.announced = true;
         this.toast(pick(CONSTRUCTION_LINES), 3);
+        this.radio?.event('workZone');
       }
     }
     // Wrong-way drivers flash their high beams.
@@ -566,6 +569,7 @@ export class Hazards {
         h.announced = true;
         this.shake = Math.max(this.shake, 0.6);
         this.toast(pick(FROST_HEAVE_LINES), 2.5);
+        this.radio?.event('heave');
       } else if (past > 300 && past < this.length - 300) {
         h.announced = false;
       }
@@ -606,7 +610,8 @@ export class Hazards {
       if (v.wrongWay) {
         if (!v.warned && ahead < 450) {
           v.warned = true;
-          this.toast('HENDAY TRAFFIC RADIO: wrong-way driver reported in your lanes!', 3.5);
+          this.toast('WRONG-WAY DRIVER reported in your lanes!', 3.5);
+          this.radio?.event('wrongWay');
         } else if (ahead > this.length - 50) {
           v.warned = false; // it's behind us now; warn again next time round
         }
@@ -616,6 +621,7 @@ export class Hazards {
           v.rockChipped = true;
           this.shake = Math.max(this.shake, 0.3);
           this.toast('ROCK CHIP! Thanks, gravel truck.', 2.5);
+          this.radio?.event('rockChip');
         } else if (behindTruck > 200 && ahead > 200) {
           v.rockChipped = false;
         }

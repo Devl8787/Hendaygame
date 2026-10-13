@@ -7,6 +7,7 @@ import { Minimap } from './minimap.js';
 import { Race } from './race.js';
 import { Hazards } from './hazards.js';
 import { buildInterchanges } from './interchange.js';
+import { Radio } from './radio.js';
 import { readInput, onPress } from './input.js';
 
 const FIXED_DT = 1 / 60;
@@ -35,8 +36,15 @@ const car = new Car(scene, world, startPose);
 const minimap = new Minimap(track, terrain?.river);
 const race = start.closed ? new Race(start) : null;
 const hazards = race ? new Hazards(scene, world, track, car) : null;
+const radio = race ? new Radio() : null;
 if (race) {
-  race.onLap = (lap) => hazards.newLap(lap);
+  hazards.radio = radio;
+  race.onStart = () => radio.event('start');
+  race.onLap = (lap) => {
+    hazards.newLap(lap);
+    radio.event(lap === race.laps ? 'finalLap' : 'lap');
+  };
+  race.onFinish = () => radio.event('finish');
   hazards.newRace();
 }
 document.getElementById('race-hud').hidden = !race;
@@ -50,6 +58,7 @@ const CAMERAS = [
 let cameraIndex = 0;
 onPress('KeyC', () => (cameraIndex = (cameraIndex + 1) % CAMERAS.length));
 onPress('KeyR', backOnTheRoad);
+onPress('KeyM', () => radio?.toggleMute());
 
 // Puts the car back on its wheels. In a race that's always our side of the
 // road, facing the race direction, in the lane nearest to where the car was.
@@ -79,12 +88,14 @@ function checkUpsideDown(dt) {
   upsideDownFor = 0;
   backOnTheRoad();
   hazards?.toast('Towed back onto the Henday. That will be $300.', 3);
+  radio?.event('tow');
 }
 onPress('Enter', () => {
   if (!race) return;
   car.reset(startPose);
   race.reset();
   hazards.newRace();
+  radio.stop();
 });
 
 const HOLD = { throttle: false, brake: false, steer: 0, handbrake: true };
@@ -145,6 +156,7 @@ renderer.setAnimationLoop(() => {
 
   car.syncMeshes();
   checkUpsideDown(frameDt);
+  radio?.update(frameDt, race?.state === 'racing');
   interchanges.update(frameDt);
   if (race) {
     carForward.set(1, 0, 0).applyQuaternion(car.mesh.quaternion);
