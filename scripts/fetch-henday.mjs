@@ -5,7 +5,14 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { osmToTrack } from './osm-to-track.mjs';
 
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+// Public Overpass servers, tried in order. They're free and often busy.
+const OVERPASS_SERVERS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+];
+const ROUNDS = 3;
+const WAIT_BETWEEN_ROUNDS = 20; // seconds
 const RAW_FILE = 'data/henday-osm.json';
 const TRACK_FILE = 'public/henday-track.json';
 
@@ -21,29 +28,51 @@ out geom;
 
 async function download() {
   console.log('Downloading Anthony Henday Drive from OpenStreetMap (can take ~30 s)…');
+  for (let round = 1; round <= ROUNDS; round++) {
+    for (const url of OVERPASS_SERVERS) {
+      const host = new URL(url).host;
+      const result = await tryServer(url);
+      if (result.text) {
+        await mkdir('data', { recursive: true });
+        await writeFile(RAW_FILE, result.text);
+        console.log(`Saved raw OpenStreetMap data from ${host} to ${RAW_FILE}`);
+        return JSON.parse(result.text);
+      }
+      console.log(`  ${host}: ${result.problem}`);
+    }
+    if (round < ROUNDS) {
+      console.log(`All servers busy. Waiting ${WAIT_BETWEEN_ROUNDS} s, then trying again (${round + 1}/${ROUNDS})…`);
+      await new Promise((r) => setTimeout(r, WAIT_BETWEEN_ROUNDS * 1000));
+    }
+  }
+  fail('Every Overpass server was busy or unreachable. Check your internet, wait a few minutes and run this again.');
+}
+
+// Returns { text } on success, or { problem } describing what went wrong.
+async function tryServer(url) {
   let res;
   try {
-    res = await fetch(OVERPASS_URL, {
+    res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'HendayRacer/0.1' },
       body: new URLSearchParams({ data: QUERY }),
+      signal: AbortSignal.timeout(150_000),
     });
   } catch (err) {
-    fail(`Couldn't reach ${OVERPASS_URL} (${err.cause?.code ?? err.message}). Check your internet connection.`);
+    return { problem: `couldn't connect (${err.cause?.code ?? err.name})` };
   }
   if (!res.ok) {
-    const busy = res.status === 429 || res.status === 504;
-    fail(
-      busy
-        ? `Overpass is busy right now (HTTP ${res.status}). Wait a minute and try again.`
-        : `Overpass answered HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`,
-    );
+    const busy = res.status === 429 || res.status === 503 || res.status === 504;
+    return { problem: busy ? `busy (HTTP ${res.status})` : `HTTP ${res.status}: ${(await res.text()).slice(0, 200)}` };
   }
   const text = await res.text();
-  await mkdir('data', { recursive: true });
-  await writeFile(RAW_FILE, text);
-  console.log(`Saved raw OpenStreetMap data to ${RAW_FILE}`);
-  return JSON.parse(text);
+  // Overpass can answer 200 with a timeout notice instead of data.
+  try {
+    if (JSON.parse(text).remark?.includes('timed out')) return { problem: 'timed out on the server' };
+  } catch {
+    return { problem: 'sent back something that isn\'t map data' };
+  }
+  return { text };
 }
 
 function fail(message) {
