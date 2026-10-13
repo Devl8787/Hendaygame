@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
+import { grassTexture } from './textures.js';
 
 // The North Saskatchewan river valley: one winding valley that enters the
 // loop at the south-west river crossing and leaves at the north-east one,
@@ -14,6 +15,12 @@ const RIVER_OUTSIDE = 900; // how far the river runs on past the loop
 const CELL = 6; // terrain grid spacing, metres
 const MARGIN = 700; // terrain detail beyond the track, metres
 const EDGE_FADE = 300; // the valley flattens out over the last stretch before the edge
+const GRASS_TILE = 9; // metres per repeat of the grass detail texture
+const GRASS = new THREE.Color(0x6f8f45);
+const LAWN = new THREE.Color(0x7a9a4a);
+const PARK = new THREE.Color(0x5f8340);
+const SUBURB_GREY = new THREE.Color(0x8d8f86);
+const FIELDS = [0xc9b32e, 0xb9a46a, 0x7f9a4e, 0x8b7d55, 0x9fae55, 0xd2bf4a].map((c) => new THREE.Color(c));
 const DIP_CUT_HALF = 10; // ground stays just under the road this far from its centre line
 const DIP_CUT_BELOW = 0.4; // ...this far under it
 const DIP_CUT_SLOPE = 1.5; // then slopes back up, horizontal metres per metre
@@ -67,6 +74,32 @@ export class Terrain {
     return Math.min(0, (-VALLEY_DEPTH * (1 - t * t * (3 - 2 * t)) + wobble) * edge);
   }
 
+  // Inside the Henday is the city; outside is farmland. `loop` is the road's
+  // outline (a few dozen points is plenty).
+  setLand(loop) {
+    this.loop = loop;
+  }
+
+  landColour(x, z) {
+    if (!this.loop) return GRASS;
+    let nearRoad = Infinity;
+    for (const [px, pz] of this.loop) nearRoad = Math.min(nearRoad, (px - x) ** 2 + (pz - z) ** 2);
+    nearRoad = Math.sqrt(nearRoad);
+    // Mown verges either side of the road.
+    if (nearRoad < 70) return GRASS;
+    const blend = Math.min(1, (nearRoad - 70) / 60);
+    if (insidePolygon(this.loop, x, z)) {
+      // Suburbs: lawns, parks and the odd paved block, softly varied.
+      const k = hash(Math.floor(x / 70), Math.floor(z / 70));
+      const target = k < 0.15 ? SUBURB_GREY : k < 0.55 ? LAWN : PARK;
+      return GRASS.clone().lerp(target, blend * 0.8);
+    }
+    // Farm fields: a patchwork of canola, wheat, pasture and fallow.
+    const fx = Math.floor((x + 37) / 150);
+    const fz = Math.floor((z - 53) / 110);
+    return GRASS.clone().lerp(FIELDS[Math.floor(hash(fx, fz) * FIELDS.length)], blend);
+  }
+
   distanceToRiver(x, z) {
     const bucket = this.buckets.get(bucketKey(x, z));
     if (!bucket) return Infinity;
@@ -88,7 +121,6 @@ export class Terrain {
     geo.rotateX(-Math.PI / 2);
     const pos = geo.attributes.position;
     const colours = new Float32Array(pos.count * 3);
-    const grass = new THREE.Color(0x6f8f45);
     const slope = new THREE.Color(0x5d7a3a);
     const mud = new THREE.Color(0x7d6a4a);
     const c = new THREE.Color();
@@ -96,6 +128,7 @@ export class Terrain {
       const x = pos.getX(i);
       const z = pos.getZ(i);
       const h = this.heightAt(x, z);
+      const grass = this.landColour(x, z);
       pos.setY(i, h);
       // Plane vertices run row by row from -z to +z; the heightfield wants
       // column-major with rows along z and columns along x.
@@ -113,7 +146,14 @@ export class Terrain {
     const ground = new THREE.Mesh(
       geo,
       // Pushed back a touch in depth so the road painted at y≈0 always wins.
-      new THREE.MeshStandardMaterial({ vertexColors: true, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
+      new THREE.MeshStandardMaterial({
+        vertexColors: true,
+        map: tiled(grassTexture(), (this.half * 2) / GRASS_TILE),
+        roughness: 0.95,
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1,
+      }),
     );
     ground.receiveShadow = true;
     scene.add(ground);
@@ -129,7 +169,14 @@ export class Terrain {
   addOutskirts(scene, world) {
     const far = this.half + 4000;
     const width = far - this.half;
-    const material = new THREE.MeshStandardMaterial({ color: 0x6f8f45, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x8a9a52, // the farm fields, blurred together at this distance
+      map: tiled(grassTexture(), 200),
+      roughness: 0.95,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1,
+    });
     const strips = [
       [0, -(this.half + width / 2), far * 2, width],
       [0, this.half + width / 2, far * 2, width],
@@ -276,4 +323,29 @@ function bucketSegments(line, pad) {
     }
   }
   return buckets;
+}
+
+function tiled(texture, repeat) {
+  if (!texture) return null;
+  const t = texture.clone();
+  t.repeat.set(repeat, repeat);
+  t.needsUpdate = true;
+  return t;
+}
+
+// Ray-casting point-in-polygon test.
+function insidePolygon(poly, x, z) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, zi] = poly[i];
+    const [xj, zj] = poly[j];
+    if (zi > z !== zj > z && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+// Stable pseudo-random number in [0, 1) for a grid cell.
+function hash(a, b) {
+  const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+  return s - Math.floor(s);
 }

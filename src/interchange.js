@@ -4,6 +4,7 @@ import { sampleAt } from './track.js';
 import { groundLayer, LAYER, RIGHT_SHOULDER } from './world.js';
 import { cuttingDepth, CUTTING_REACH } from './terrain.js';
 import { buildCarMesh, addStaticWheels, CAR_SIZE } from './car.js';
+import { concreteTexture } from './textures.js';
 
 // The Henday's interchanges, simplified to diamonds: the crossing road goes
 // either over the Henday on an overpass or under it through a cutting, with
@@ -32,7 +33,7 @@ const mats = {
   asphalt: () => new THREE.MeshStandardMaterial({ color: 0x3b3d40, roughness: 0.95, side: THREE.DoubleSide }),
   white: new THREE.MeshStandardMaterial({ color: 0xf2f2f2, side: THREE.DoubleSide }),
   yellow: new THREE.MeshStandardMaterial({ color: 0xf2c230, side: THREE.DoubleSide }),
-  concrete: new THREE.MeshStandardMaterial({ color: 0xb9b6ad, roughness: 0.9 }),
+  concrete: new THREE.MeshStandardMaterial({ color: 0xe0ddd5, roughness: 0.9, map: concreteTexture() }),
   embankment: new THREE.MeshStandardMaterial({ color: 0x6a8a42, roughness: 1, side: THREE.DoubleSide }),
   barrelOrange: new THREE.MeshStandardMaterial({ color: 0xff6a00 }),
   barrelWhite: new THREE.MeshStandardMaterial({ color: 0xf4f4f4 }),

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { LANE_WIDTH, sampleAt } from './track.js';
 import { groundLayer, LAYER } from './world.js';
+import { concreteTexture } from './textures.js';
 
 // A Henday work zone closing one outside lane (0 = median side, 2 = right):
 // a sign well before it, a flashing arrow board, a cone taper, concrete
@@ -17,7 +18,7 @@ const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...extra });
 const MATS = {
   cone: mat(0xff6a00),
-  concrete: mat(0xc9c5bb, { roughness: 0.95 }),
+  concrete: mat(0xe0ddd5, { roughness: 0.95, map: concreteTexture() }),
   yellow: mat(0xf2b705, { roughness: 0.6 }),
   dark: mat(0x2b2b2b),
   glass: mat(0x1a2733, { metalness: 0.8, roughness: 0.1 }),
@@ -220,7 +221,7 @@ function buildArrowBoard(edge) {
   panel.position.y = 2.9;
   group.add(trailer, mast, panel);
 
-  const on = new THREE.MeshStandardMaterial({ color: 0xffb000, emissive: 0xffa000, emissiveIntensity: 2 });
+  const on = new THREE.MeshStandardMaterial({ color: 0xffb000, emissive: 0xffa000, emissiveIntensity: 5 });
   const off = new THREE.MeshStandardMaterial({ color: 0x3a2a00 });
   const dot = new THREE.SphereGeometry(0.07, 8, 6);
   // Arrow in the panel's plane: shaft along z, head at the open-lane end.

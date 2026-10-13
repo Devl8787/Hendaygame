@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { LANE_WIDTH, poseAt } from './track.js';
 import { Terrain } from './terrain.js';
+import { asphaltTexture, concreteTexture } from './textures.js';
 
 export const LEFT_SHOULDER = 1;
 export const RIGHT_SHOULDER = 2.5;
@@ -75,6 +76,8 @@ function addGround(scene, world, track) {
       });
     }
     const terrain = new Terrain(track.river, extent, cuttings, dips);
+    const ours = track.carriageways[0].points;
+    terrain.setLand(ours.filter((_, i) => i % 20 === 0));
     terrain.build(scene, world);
     return terrain;
   }
@@ -124,7 +127,7 @@ const DECK_DEPTH = 1.2;
 const DIP_MARGIN = 10; // points (~30 m) the slab runs on past the dip
 function addBridgeStructures(scene, world, c, terrain) {
   const n = c.points.length;
-  const concrete = new THREE.MeshStandardMaterial({ color: 0xb9b6ad, roughness: 0.9 });
+  const concrete = new THREE.MeshStandardMaterial({ color: 0xe0ddd5, roughness: 0.9, map: concreteTexture() });
   const left = (i) => -c.width(i) / 2 - LEFT_SHOULDER;
   const right = (i) => c.width(i) / 2 + RIGHT_SHOULDER;
   const fixed = (position, rotation, desc) => {
@@ -206,7 +209,7 @@ function addCarriageway(scene, c) {
 
   const asphalt = new THREE.Mesh(
     ribbon(c, (i) => -half(i) - LEFT_SHOULDER, (i) => half(i) + RIGHT_SHOULDER, y),
-    new THREE.MeshStandardMaterial({ color: 0x3b3d40, roughness: 0.95 }),
+    new THREE.MeshStandardMaterial({ color: 0x75777b, roughness: 0.92, map: asphaltTexture() }),
   );
   asphalt.receiveShadow = true;
   scene.add(groundLayer(asphalt, LAYER.asphalt));
@@ -236,7 +239,7 @@ function addCarriageway(scene, c) {
 function addBridgeBarriers(scene, c, half) {
   const isBridge = (i) => c.points[i][3] === 1;
   if (!c.points.some((p) => p[3] === 1)) return;
-  const concrete = new THREE.MeshStandardMaterial({ color: 0xb9b6ad, roughness: 0.9, side: THREE.DoubleSide });
+  const concrete = new THREE.MeshStandardMaterial({ color: 0xe0ddd5, roughness: 0.9, side: THREE.DoubleSide, map: concreteTexture() });
   for (const offset of [(i) => -half(i) - LEFT_SHOULDER, (i) => half(i) + RIGHT_SHOULDER]) {
     const wall = new THREE.Mesh(wallRibbon(c, offset, 0.9, isBridge), concrete);
     wall.castShadow = true;
@@ -270,11 +273,22 @@ function wallRibbon(c, offset, height, include) {
   });
 }
 
+// Texture coordinates: u runs across the strip (0 = left edge), v along it
+// in units of UV_TILE metres, so the asphalt texture tiles square.
+const UV_TILE = 14;
 function stripGeometry(c, include, pushPair) {
   const n = c.points.length;
   const segments = c.closed ? n : n - 1;
   const positions = [];
+  const uvs = [];
   const indices = [];
+  // Distance along the road, carrying on past the end of a closed loop
+  // rather than jumping back to 0 (which would squash a whole tile into one piece).
+  const pushWithUv = (i, wrapped) => {
+    pushPair(i, positions);
+    const v = (wrapped ? c.totalLength : c.distance[i]) / UV_TILE;
+    uvs.push(0, v, 1, v);
+  };
   let pairs = 0;
   let open = false; // whether the previous pair can be joined to
   for (let s = 0; s < segments; s++) {
@@ -283,10 +297,10 @@ function stripGeometry(c, include, pushPair) {
       continue;
     }
     if (!open) {
-      pushPair(s, positions);
+      pushWithUv(s, false);
       pairs++;
     }
-    pushPair((s + 1) % n, positions);
+    pushWithUv((s + 1) % n, s + 1 === n);
     pairs++;
     const a = (pairs - 2) * 2;
     // Two triangles per piece, wound so flat strips face up (+y).
@@ -295,6 +309,7 @@ function stripGeometry(c, include, pushPair) {
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   geo.setIndex(indices);
   geo.computeVertexNormals();
   return geo;

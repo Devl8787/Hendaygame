@@ -48,6 +48,7 @@ Road data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributo
 | C | Switch chase / driver camera |
 | Enter | Restart the race |
 | M | Mute / unmute Henday Traffic Radio |
+| G | Graphics quality: low / medium / high (remembered) |
 
 A race is 3 laps. The loop is split into checkpoints, so cutting across the
 infield or reversing over the line doesn't count. Your best lap is saved in the
@@ -83,6 +84,9 @@ ramp is barricaded: EXIT CLOSED.
 | `src/world.js` | Builds the scenery from the track: asphalt, lane lines, bridge barriers, light poles, knock-over cones. |
 | `src/minimap.js` | The map in the corner. |
 | `src/race.js` | Countdown, laps, checkpoints, lap timer, best lap, wrong-way warning. |
+| `src/graphics.js` | Sky, sunlight, reflections, colour, and the quality setting. |
+| `src/textures.js` | Asphalt, grass, concrete and window textures, painted in code. |
+| `src/scenery.js` | Trees, downtown Edmonton's skyline and the Muttart pyramids. |
 | `src/radio.js` | Henday Traffic Radio 2-16: Brenda's lines, voice, jingle and static. |
 | `src/hazards.js` | Traffic and its lane-changing AI, wrong-way drivers, potholes, moving lane closures, grass. |
 | `src/construction.js` | Work zones: sign, arrow board, cones, barriers, excavator and crew. |
@@ -105,5 +109,5 @@ then copied to its body's position and rotation.
 5. ✅ Hills: the south-west and north-east river valleys, a giant frost heave
 6. ✅ Interchanges: overpasses, underpasses and closed exits
 7. Sound: ✅ Henday Traffic Radio (browser voice); still to come: recorded voice, engine sounds, music
-8. Graphics pass: textures, lighting, real models (Blender / free assets)
+8. Graphics: ✅ sky, lighting, textures, trees, farmland, skyline; still to come: real 3D models, night mode
 9. Optional Google Photorealistic 3D Tiles for scenery

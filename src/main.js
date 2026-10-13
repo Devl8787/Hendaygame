@@ -8,6 +8,8 @@ import { Race } from './race.js';
 import { Hazards } from './hazards.js';
 import { buildInterchanges } from './interchange.js';
 import { Radio } from './radio.js';
+import { Graphics } from './graphics.js';
+import { buildScenery } from './scenery.js';
 import { readInput, onPress } from './input.js';
 
 const FIXED_DT = 1 / 60;
@@ -15,8 +17,6 @@ const FIXED_DT = 1 / 60;
 const [track] = await Promise.all([loadTrack(), RAPIER.init()]);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -28,6 +28,8 @@ const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
 world.timestep = FIXED_DT;
 const { terrain } = createWorld(scene, world, track);
 const interchanges = buildInterchanges(scene, world, track, terrain);
+buildScenery(scene, track, terrain);
+const graphics = new Graphics(renderer, scene, camera);
 const start = track.carriageways[0];
 // Start a few metres behind the line, in the middle lane.
 const startIndex = start.closed ? start.points.length - 3 : 0;
@@ -59,6 +61,13 @@ let cameraIndex = 0;
 onPress('KeyC', () => (cameraIndex = (cameraIndex + 1) % CAMERAS.length));
 onPress('KeyR', backOnTheRoad);
 onPress('KeyM', () => radio?.toggleMute());
+onPress('KeyG', () => {
+  const level = graphics.cycleQuality();
+  const toast = document.getElementById('toast');
+  toast.textContent = `Graphics: ${level}`;
+  clearTimeout(toast.hideTimer);
+  toast.hideTimer = setTimeout(() => (toast.textContent = ''), 1500);
+});
 
 // Puts the car back on its wheels. In a race that's always our side of the
 // road, facing the race direction, in the lane nearest to where the car was.
@@ -126,7 +135,7 @@ function updateCamera(dt, snap) {
 
   const sun = scene.userData.sun;
   sun.target.position.copy(car.mesh.position);
-  sun.position.copy(car.mesh.position).add(new THREE.Vector3(60, 120, 40));
+  sun.position.copy(car.mesh.position).add(scene.userData.sunOffset);
 }
 
 const speedEl = document.getElementById('speed-value');
@@ -134,7 +143,7 @@ const speedEl = document.getElementById('speed-value');
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  graphics.resize(window.innerWidth, window.innerHeight);
 });
 
 // Physics runs at a fixed 60 Hz no matter the screen's refresh rate.
@@ -166,7 +175,7 @@ renderer.setAnimationLoop(() => {
   updateCamera(frameDt, false);
   speedEl.textContent = Math.round(Math.abs(car.speed) * 3.6);
   minimap.draw(car.mesh.position.x, car.mesh.position.z);
-  renderer.render(scene, camera);
+  graphics.render();
 });
 
 document.getElementById('loading').remove();

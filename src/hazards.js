@@ -556,7 +556,7 @@ export class Hazards {
     }
     // Wrong-way drivers flash their high beams.
     const flash = Math.floor(performance.now() / 200) % 2 === 0;
-    for (const v of this.vehicles) if (v.wrongWay) v.mesh.userData.headlights.emissiveIntensity = flash ? 3 : 0.2;
+    for (const v of this.vehicles) if (v.wrongWay) v.mesh.userData.headlights.emissiveIntensity = flash ? 8 : 0.3;
 
     this.shake = Math.max(0, this.shake - dt * 2.5);
     if (this.toastTimer > 0 && (this.toastTimer -= dt) <= 0) this.toastEl.textContent = '';

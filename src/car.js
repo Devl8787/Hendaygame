@@ -165,12 +165,12 @@ export class Car {
 }
 
 // Also used for traffic. `car.userData.headlights` is the headlight material.
-export function buildCarMesh(color = 0xc8102e) {
+export function buildCarMesh(color = 0x9e0a1e) {
   const car = new THREE.Group();
-  const paint = new THREE.MeshStandardMaterial({ color, metalness: 0.3, roughness: 0.4 });
-  const glass = new THREE.MeshStandardMaterial({ color: 0x1a2733, metalness: 0.8, roughness: 0.1 });
-  const light = new THREE.MeshStandardMaterial({ color: 0xfff6d0, emissive: 0xfff2b0, emissiveIntensity: 0.6 });
-  const tail = new THREE.MeshStandardMaterial({ color: 0x990000, emissive: 0xff0000, emissiveIntensity: 0.4 });
+  const paint = new THREE.MeshStandardMaterial({ color, metalness: 0.45, roughness: 0.32 });
+  const glass = new THREE.MeshStandardMaterial({ color: 0x1a2733, metalness: 0.9, roughness: 0.05 });
+  const light = new THREE.MeshStandardMaterial({ color: 0xfff6d0, emissive: 0xfff2b0, emissiveIntensity: 4 });
+  const tail = new THREE.MeshStandardMaterial({ color: 0x990000, emissive: 0xff0000, emissiveIntensity: 3 });
 
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(CHASSIS.halfLength * 2, CHASSIS.halfHeight * 2, CHASSIS.halfWidth * 2),
