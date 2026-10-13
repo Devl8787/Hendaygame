@@ -31,10 +31,17 @@ canvas {
   font-variant-numeric: tabular-nums;
 }
 
-#help {
+#top-left {
   position: absolute;
   left: 16px;
   top: 12px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#help {
   font-size: 14px;
 }
 
@@ -46,4 +53,18 @@ canvas {
   font-size: 28px;
   color: #fff;
   background: #1d2a38;
+}
+
+#track-info {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+#minimap {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
 }

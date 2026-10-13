@@ -25,19 +25,18 @@ const HANDBRAKE_FORCE = 120;
 const MAX_STEER = 0.55;
 const STEER_SPEED = 3.0;
 
-// Turning the chassis 90° about y points local +x down world -z (up the road).
-const FACING_UP_ROAD = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+const SPAWN_HEIGHT = 1.2;
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
 export class Car {
+  // spawn: { x, z, heading } where heading turns local +x toward the direction of travel.
   constructor(scene, world, spawn) {
-    this.world = world;
-    this.spawn = spawn;
     this.steer = 0;
 
     this.body = world.createRigidBody(
       RAPIER.RigidBodyDesc.dynamic()
-        .setTranslation(spawn.x, spawn.y, spawn.z)
-        .setRotation(FACING_UP_ROAD)
+        .setTranslation(spawn.x, SPAWN_HEIGHT, spawn.z)
+        .setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, spawn.heading))
         .setCanSleep(false)
         .setLinearDamping(0.05)
         .setAngularDamping(0.5),
@@ -126,10 +125,10 @@ export class Car {
     this.body.applyImpulse({ x: -v.x * k, y: -v.y * k, z: -v.z * k }, true);
   }
 
-  reset() {
-    const { x, z } = this.body.translation();
-    this.body.setTranslation({ x, y: 1.5, z }, true);
-    this.body.setRotation(FACING_UP_ROAD, true);
+  // Puts the car back on its wheels at the given pose, stopped.
+  reset(pose) {
+    this.body.setTranslation({ x: pose.x, y: SPAWN_HEIGHT, z: pose.z }, true);
+    this.body.setRotation(new THREE.Quaternion().setFromAxisAngle(Y_AXIS, pose.heading), true);
     this.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
     this.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     this.steer = 0;

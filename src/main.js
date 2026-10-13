@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
-import { createWorld, syncBodies, SPAWN } from './world.js';
+import { createWorld, syncBodies } from './world.js';
+import { loadTrack, poseAt, rightLaneOffset, nearestLanePose } from './track.js';
 import { Car } from './car.js';
+import { Minimap } from './minimap.js';
 import { readInput, onPress } from './input.js';
 
 const FIXED_DT = 1 / 60;
 
-await RAPIER.init();
+const [track] = await Promise.all([loadTrack(), RAPIER.init()]);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -16,12 +18,15 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2000);
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.3, 2000);
 
 const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
 world.timestep = FIXED_DT;
-const { cones } = createWorld(scene, world);
-const car = new Car(scene, world, SPAWN);
+const { cones } = createWorld(scene, world, track);
+const start = track.carriageways[0];
+const car = new Car(scene, world, poseAt(start, 0, rightLaneOffset(start, 0)));
+const minimap = new Minimap(track);
+showTrackInfo(track);
 
 // Chase camera offsets in the car's local space (+x is forward).
 const CAMERAS = [
@@ -30,7 +35,10 @@ const CAMERAS = [
 ];
 let cameraIndex = 0;
 onPress('KeyC', () => (cameraIndex = (cameraIndex + 1) % CAMERAS.length));
-onPress('KeyR', () => car.reset());
+onPress('KeyR', () => {
+  const { x, z } = car.body.translation();
+  car.reset(nearestLanePose(track, x, z));
+});
 
 const camTarget = new THREE.Vector3();
 const lookTarget = new THREE.Vector3();
@@ -76,7 +84,18 @@ renderer.setAnimationLoop(() => {
   syncBodies(cones);
   updateCamera(frameDt, false);
   speedEl.textContent = Math.round(Math.abs(car.speed) * 3.6);
+  minimap.draw(car.mesh.position.x, car.mesh.position.z);
   renderer.render(scene, camera);
 });
 
 document.getElementById('loading').remove();
+
+function showTrackInfo(track) {
+  const info = document.getElementById('track-info');
+  if (track.isTestStrip) {
+    info.textContent = 'Test strip: run "npm run fetch-henday" to load the real Anthony Henday';
+  } else {
+    const km = (track.carriageways[0].length / 1000).toFixed(1);
+    info.textContent = `${track.name} · ${track.carriageways[0].name} · ${km} km · ${track.attribution}`;
+  }
+}

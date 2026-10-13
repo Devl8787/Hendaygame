@@ -1,31 +1,28 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
+import { LANE_WIDTH, poseAt } from './track.js';
 
-// A straight 2 km test strip shaped like a stretch of the Henday:
-// two lanes each way, divided by a grass median. Cars drive on the right,
-// so "our" carriageway is on +x and we head toward -z.
-export const LANE_WIDTH = 3.7;
-export const ROAD_START_Z = 50;
-export const ROAD_END_Z = -2000;
-const ROAD_LENGTH = ROAD_START_Z - ROAD_END_Z;
-const ROAD_MID_Z = (ROAD_START_Z + ROAD_END_Z) / 2;
-const MEDIAN_WIDTH = 14;
-const SHOULDER = 2.5;
+const LEFT_SHOULDER = 1;
+const RIGHT_SHOULDER = 2.5;
+const LINE_WIDTH = 0.15;
+const POLE_EVERY = 60; // metres
 
-// Centre x of each carriageway.
-export const NORTHBOUND_X = LANE_WIDTH;
-const ONCOMING_X = -(MEDIAN_WIDTH + LANE_WIDTH);
+// The ground, asphalt and paint are flat layers only centimetres apart, which
+// some GPUs can't separate by depth, so the grass would flicker through the road.
+// Instead they skip the depth buffer and are drawn in a fixed order, bottom up.
+const LAYER = { grass: -3, asphalt: -2, paint: -1 };
+function groundLayer(mesh, layer) {
+  mesh.material.depthWrite = false;
+  mesh.renderOrder = layer;
+  return mesh;
+}
 
-// Spawn point: right-hand lane of our carriageway.
-export const SPAWN = { x: NORTHBOUND_X + LANE_WIDTH / 2, y: 1.2, z: 0 };
-
-export function createWorld(scene, world) {
+export function createWorld(scene, world, track) {
   addLights(scene);
-  addGround(scene, world);
-  addCarriageway(scene, NORTHBOUND_X);
-  addCarriageway(scene, ONCOMING_X);
-  addLightPoles(scene);
-  return { cones: addCones(scene, world) };
+  addGround(scene, world, track);
+  track.carriageways.forEach((c) => addCarriageway(scene, c));
+  addLightPoles(scene, track);
+  return { cones: addLaneClosure(scene, world, track.carriageways[0]) };
 }
 
 function addLights(scene) {
@@ -35,7 +32,6 @@ function addLights(scene) {
   scene.add(new THREE.HemisphereLight(0xdfefff, 0x5a6b3a, 1.2));
 
   const sun = new THREE.DirectionalLight(0xffffff, 2.2);
-  sun.position.set(60, 120, 40);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   const s = sun.shadow.camera;
@@ -50,88 +46,159 @@ function addLights(scene) {
   scene.userData.sun = sun;
 }
 
-function addGround(scene, world) {
+function addGround(scene, world, track) {
+  // Size the ground to the track, with a couple of km to spare.
+  let extent = 0;
+  for (const c of track.carriageways) {
+    for (const [x, z] of c.points) extent = Math.max(extent, Math.abs(x), Math.abs(z));
+  }
+  const half = extent + 2000;
+
   const grass = new THREE.Mesh(
-    new THREE.PlaneGeometry(4000, 4000),
+    new THREE.PlaneGeometry(half * 2, half * 2),
     new THREE.MeshStandardMaterial({ color: 0x6f8f45 }),
   );
   grass.rotation.x = -Math.PI / 2;
   grass.receiveShadow = true;
-  scene.add(grass);
+  scene.add(groundLayer(grass, LAYER.grass));
 
-  // One big flat collider for everything. Real terrain comes later with the OSM import.
+  // The road is painted onto one big flat collider. Hills and bridges come later.
   world.createCollider(
-    RAPIER.ColliderDesc.cuboid(2000, 0.5, 2000).setTranslation(0, -0.5, 0).setFriction(1.0),
+    RAPIER.ColliderDesc.cuboid(half, 0.5, half).setTranslation(0, -0.5, 0).setFriction(1.0),
   );
 }
 
-function addCarriageway(scene, centerX) {
-  const width = LANE_WIDTH * 2 + SHOULDER * 2;
+function addCarriageway(scene, c) {
+  const y = 0.02;
+  const half = (i) => c.width(i) / 2;
+
   const asphalt = new THREE.Mesh(
-    new THREE.PlaneGeometry(width, ROAD_LENGTH),
+    ribbon(c, (i) => -half(i) - LEFT_SHOULDER, (i) => half(i) + RIGHT_SHOULDER, y),
     new THREE.MeshStandardMaterial({ color: 0x3b3d40, roughness: 0.95 }),
   );
-  asphalt.rotation.x = -Math.PI / 2;
-  asphalt.position.set(centerX, 0.01, ROAD_MID_Z);
   asphalt.receiveShadow = true;
-  scene.add(asphalt);
+  scene.add(groundLayer(asphalt, LAYER.asphalt));
 
   const white = new THREE.MeshStandardMaterial({ color: 0xf2f2f2 });
   const yellow = new THREE.MeshStandardMaterial({ color: 0xf2c230 });
+  const line = (offset, mat, include) => {
+    const geo = ribbon(c, (i) => offset(i) - LINE_WIDTH / 2, (i) => offset(i) + LINE_WIDTH / 2, y + 0.01, include);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.receiveShadow = true;
+    scene.add(groundLayer(mesh, LAYER.paint));
+  };
 
-  // Solid edge lines: yellow on the median side, white on the outside.
-  const edgeGeo = new THREE.PlaneGeometry(0.15, ROAD_LENGTH);
-  const medianSide = centerX > 0 ? -1 : 1;
-  for (const [side, mat] of [[medianSide, yellow], [-medianSide, white]]) {
-    const line = new THREE.Mesh(edgeGeo, mat);
-    line.rotation.x = -Math.PI / 2;
-    line.position.set(centerX + side * LANE_WIDTH, 0.02, ROAD_MID_Z);
-    scene.add(line);
+  // Yellow on the median (left) edge, white on the outside edge.
+  line((i) => -half(i), yellow);
+  line((i) => half(i), white);
+  // Dashed lines between lanes: 3 m dash, 9 m gap.
+  const maxLanes = Math.max(...c.points.map((p) => p[2]));
+  for (let k = 1; k < maxLanes; k++) {
+    line((i) => -half(i) + k * LANE_WIDTH, white, (i) => k < c.points[i][2] && c.distance[i] % 12 < 3);
   }
 
-  // Dashed centre line: 3 m dash, 9 m gap.
-  const dashGeo = new THREE.PlaneGeometry(0.15, 3);
-  dashGeo.rotateX(-Math.PI / 2);
-  const count = Math.floor(ROAD_LENGTH / 12);
-  const dashes = new THREE.InstancedMesh(dashGeo, white, count);
-  const m = new THREE.Matrix4();
-  for (let i = 0; i < count; i++) {
-    m.makeTranslation(centerX, 0.02, ROAD_START_Z - i * 12);
-    dashes.setMatrixAt(i, m);
-  }
-  scene.add(dashes);
+  addBridgeBarriers(scene, c, half);
 }
 
-function addLightPoles(scene) {
+// Concrete barriers on both sides wherever OSM marks a bridge.
+function addBridgeBarriers(scene, c, half) {
+  const isBridge = (i) => c.points[i][3] === 1;
+  if (!c.points.some((p) => p[3] === 1)) return;
+  const concrete = new THREE.MeshStandardMaterial({ color: 0xb9b6ad, roughness: 0.9, side: THREE.DoubleSide });
+  for (const offset of [(i) => -half(i) - LEFT_SHOULDER, (i) => half(i) + RIGHT_SHOULDER]) {
+    const wall = new THREE.Mesh(wallRibbon(c, offset, 0.9, isBridge), concrete);
+    wall.castShadow = true;
+    scene.add(wall);
+  }
+}
+
+// A flat strip following the carriageway, between two sideways offsets.
+// `include(i)` (optional) decides whether the piece from point i to i+1 is drawn.
+function ribbon(c, leftOffset, rightOffset, y, include) {
+  return stripGeometry(c, include, (i, out) => {
+    const [x, z] = c.points[i];
+    const rx = -c.tangents[i * 2 + 1];
+    const rz = c.tangents[i * 2];
+    const l = leftOffset(i);
+    const r = rightOffset(i);
+    out.push(x + rx * l, y, z + rz * l, x + rx * r, y, z + rz * r);
+  });
+}
+
+// A vertical strip (barrier) at one sideways offset.
+function wallRibbon(c, offset, height, include) {
+  return stripGeometry(c, include, (i, out) => {
+    const [x, z] = c.points[i];
+    const o = offset(i);
+    const px = x - c.tangents[i * 2 + 1] * o;
+    const pz = z + c.tangents[i * 2] * o;
+    out.push(px, 0, pz, px, height, pz);
+  });
+}
+
+function stripGeometry(c, include, pushPair) {
+  const n = c.points.length;
+  const segments = c.closed ? n : n - 1;
+  const positions = [];
+  const indices = [];
+  let pairs = 0;
+  let open = false; // whether the previous pair can be joined to
+  for (let s = 0; s < segments; s++) {
+    if (include && !include(s)) {
+      open = false;
+      continue;
+    }
+    if (!open) {
+      pushPair(s, positions);
+      pairs++;
+    }
+    pushPair((s + 1) % n, positions);
+    pairs++;
+    const a = (pairs - 2) * 2;
+    // Two triangles per piece, wound so flat strips face up (+y).
+    indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+    open = true;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function addLightPoles(scene, track) {
   const poleGeo = new THREE.CylinderGeometry(0.12, 0.15, 10, 8);
   poleGeo.translate(0, 5, 0);
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a8f96, metalness: 0.6, roughness: 0.4 });
-  const count = Math.floor(ROAD_LENGTH / 60);
-  const poles = new THREE.InstancedMesh(poleGeo, mat, count * 2);
+  const spots = [];
+  for (const c of track.carriageways) {
+    let next = 0;
+    for (let i = 0; i < c.points.length; i++) {
+      if (c.distance[i] < next) continue;
+      spots.push(poseAt(c, i, c.width(i) / 2 + RIGHT_SHOULDER + 2));
+      next = c.distance[i] + POLE_EVERY;
+    }
+  }
+  const poles = new THREE.InstancedMesh(poleGeo, mat, spots.length);
   poles.castShadow = true;
   const m = new THREE.Matrix4();
-  const medianCentre = -MEDIAN_WIDTH / 2;
-  for (let i = 0; i < count; i++) {
-    const z = ROAD_START_Z - i * 60;
-    m.makeTranslation(medianCentre, 0, z);
-    poles.setMatrixAt(i * 2, m);
-    m.makeTranslation(NORTHBOUND_X + LANE_WIDTH + SHOULDER + 2, 0, z);
-    poles.setMatrixAt(i * 2 + 1, m);
-  }
+  spots.forEach((p, i) => poles.setMatrixAt(i, m.makeTranslation(p.x, 0, p.z)));
   scene.add(poles);
 }
 
-// Construction cones you can knock over: the first taste of Henday road work.
-function addCones(scene, world) {
+// Cones closing the right-hand lane a few hundred metres past the start:
+// the first taste of Henday construction season. You can knock them over.
+function addLaneClosure(scene, world, c) {
   const geo = new THREE.ConeGeometry(0.2, 0.7, 12);
   const mat = new THREE.MeshStandardMaterial({ color: 0xff6a00 });
+  const start = Math.min(100, c.points.length - 40);
   const cones = [];
-  for (let i = 0; i < 12; i++) {
-    const x = NORTHBOUND_X + LANE_WIDTH / 2 - i * 0.3;
-    const z = -150 - i * 6;
-    const body = world.createRigidBody(
-      RAPIER.RigidBodyDesc.dynamic().setTranslation(x, 0.35, z),
-    );
+  for (let k = 0; k < 12; k++) {
+    const i = start + k * 2;
+    // Taper from the right edge in to the lane line.
+    const offset = c.width(i) / 2 - 0.3 - (k / 11) * (LANE_WIDTH - 0.6);
+    const p = poseAt(c, i, offset);
+    const body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(p.x, 0.35, p.z));
     world.createCollider(RAPIER.ColliderDesc.cone(0.35, 0.2).setDensity(40), body);
     const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = true;
