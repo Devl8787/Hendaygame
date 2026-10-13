@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { createWorld } from './world.js';
-import { loadTrack, poseAt, rightLaneOffset, nearestLanePose } from './track.js';
+import { loadTrack, poseAt, rightLaneOffset, nearestLanePose, laneOffset, LANE_WIDTH } from './track.js';
 import { Car } from './car.js';
 import { Minimap } from './minimap.js';
 import { Race } from './race.js';
@@ -47,11 +47,37 @@ const CAMERAS = [
 ];
 let cameraIndex = 0;
 onPress('KeyC', () => (cameraIndex = (cameraIndex + 1) % CAMERAS.length));
-onPress('KeyR', () => {
+onPress('KeyR', backOnTheRoad);
+
+// Puts the car back on its wheels. In a race that's always our side of the
+// road, facing the race direction, in the lane nearest to where the car was.
+function backOnTheRoad() {
   const { x, z } = car.body.translation();
-  car.reset(nearestLanePose(track, x, z));
-  race?.relocate();
-});
+  if (!race) {
+    car.reset(nearestLanePose(track, x, z));
+    return;
+  }
+  const i = race.nearestIndex({ x, z });
+  const [px, pz] = start.points[i];
+  const lateral = (x - px) * -start.tangents[i * 2 + 1] + (z - pz) * start.tangents[i * 2];
+  const lanes = Math.round(start.width(i) / LANE_WIDTH);
+  const lane = THREE.MathUtils.clamp(Math.round((lateral + start.width(i) / 2) / LANE_WIDTH - 0.5), 0, lanes - 1);
+  car.reset(poseAt(start, i, laneOffset(start, i, lane)));
+  race.relocate();
+}
+
+// Upside down (or on its side) for a while: call the tow truck.
+const TOW_AFTER = 2.5; // seconds
+let upsideDownFor = 0;
+const carUp = new THREE.Vector3();
+function checkUpsideDown(dt) {
+  carUp.set(0, 1, 0).applyQuaternion(car.mesh.quaternion);
+  upsideDownFor = carUp.y < 0.3 ? upsideDownFor + dt : 0;
+  if (upsideDownFor < TOW_AFTER) return;
+  upsideDownFor = 0;
+  backOnTheRoad();
+  hazards?.toast('Towed back onto the Henday. That will be $300.', 3);
+}
 onPress('Enter', () => {
   if (!race) return;
   car.reset(startPose);
@@ -116,6 +142,7 @@ renderer.setAnimationLoop(() => {
   }
 
   car.syncMeshes();
+  checkUpsideDown(frameDt);
   if (race) {
     carForward.set(1, 0, 0).applyQuaternion(car.mesh.quaternion);
     race.update(frameDt, car.mesh.position, carForward, car.speed);

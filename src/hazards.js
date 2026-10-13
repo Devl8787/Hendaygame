@@ -9,9 +9,9 @@ import { buildWorkZone, removeWorkZone, animateWorkZone, buildDiamondSign } from
 // potholes, lane closures that move every lap, and grass that slows you down.
 
 const POTHOLES = 14;
-const FROST_HEAVES = 5;
-const HEAVE_HEIGHT = 0.22; // metres
-const HEAVE_LENGTH = 7; // metres along the road
+// One giant frost heave on the straightest stretch of the lap.
+const HEAVE_HEIGHT = 0.6; // metres
+const HEAVE_LENGTH = 16; // metres along the road
 const CLOSURES_PER_LAP = 2;
 const TRAFFIC = 10; // our direction
 const SEMIS = 2; // of the traffic above
@@ -39,10 +39,10 @@ const POTHOLE_LINES = [
 ];
 
 const FROST_HEAVE_LINES = [
-  "FROST HEAVE! Edmonton's natural ski jump.",
-  'FROST HEAVE! Free airtime, courtesy of winter.',
-  'FROST HEAVE! Your coffee is now on the ceiling.',
-  'FROST HEAVE! The road is doing the wave.',
+  "THE BIG ONE! Edmonton's natural ski jump.",
+  'THE BIG ONE! Free airtime, courtesy of winter.',
+  'THE BIG ONE! Your coffee is now on the ceiling.',
+  'THE BIG ONE! Frost heave, est. 1987. Still unpatched.',
 ];
 
 const CONSTRUCTION_LINES = [
@@ -172,72 +172,100 @@ export class Hazards {
 
   // ------------------------------------------------------------ frost heaves
 
-  // Humps across our carriageway: the top of a huge cylinder buried under the
-  // road, so wheels roll over a smooth curve. Hit one fast and you get air.
+  // A hump across our carriageway: the top of a huge cylinder buried under
+  // the road, so wheels roll over a smooth curve. Hit it fast and you fly.
   placeFrostHeaves() {
     const c = this.ours;
+    const s = this.straightestSpot();
     const radius = (HEAVE_LENGTH ** 2 / 4 + HEAVE_HEIGHT ** 2) / (2 * HEAVE_HEIGHT);
-    const patch = new THREE.MeshStandardMaterial({ color: 0x47484b, roughness: 0.95 });
-    const crack = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 1 });
-    for (let k = 0; k < FROST_HEAVES; k++) {
-      let s;
-      for (let tries = 0; tries < 100; tries++) {
-        s = this.randomS();
-        const nearBridge = [-30, 0, 30].some((d) => c.points[sampleAt(c, s + d).index][3] === 1);
-        const crowded = this.heaves.some((h) => Math.min(gap(this.length, h.s, s), gap(this.length, s, h.s)) < 300);
-        if (!nearBridge && !crowded) break;
-      }
-      const centreOffset = (RIGHT_SHOULDER - LEFT_SHOULDER) / 2;
-      const halfAcross = (c.width(0) + LEFT_SHOULDER + RIGHT_SHOULDER) / 2;
-      const pose = sampleAt(c, s, centreOffset);
-      const heading = new THREE.Quaternion().setFromAxisAngle(Y_AXIS, pose.heading);
+    const centreOffset = (RIGHT_SHOULDER - LEFT_SHOULDER) / 2;
+    const halfAcross = (c.width(0) + LEFT_SHOULDER + RIGHT_SHOULDER) / 2;
+    const pose = sampleAt(c, s, centreOffset);
+    const heading = new THREE.Quaternion().setFromAxisAngle(Y_AXIS, pose.heading);
 
-      // Physics: cylinder axis (local y) turned to run across the road.
-      const body = this.world.createRigidBody(
-        RAPIER.RigidBodyDesc.fixed()
-          .setTranslation(pose.x, HEAVE_HEIGHT - radius, pose.z)
-          .setRotation(heading.clone().multiply(ACROSS_ROAD)),
-      );
-      this.world.createCollider(RAPIER.ColliderDesc.cylinder(halfAcross, radius).setFriction(1), body);
+    // Physics: cylinder axis (local y) turned to run across the road.
+    const body = this.world.createRigidBody(
+      RAPIER.RigidBodyDesc.fixed()
+        .setTranslation(pose.x, HEAVE_HEIGHT - radius, pose.z)
+        .setRotation(heading.clone().multiply(ACROSS_ROAD)),
+    );
+    this.world.createCollider(RAPIER.ColliderDesc.cylinder(halfAcross, radius).setFriction(1), body);
 
-      // Visible hump: a strip following the same curve, in road-local axes.
-      const positions = [];
-      const steps = 28;
-      for (let j = 0; j <= steps; j++) {
-        const d = -HEAVE_LENGTH / 2 + (HEAVE_LENGTH * j) / steps;
-        const y = Math.max(0, Math.sqrt(radius * radius - d * d) - (radius - HEAVE_HEIGHT)) + 0.03;
-        positions.push(d, y, -halfAcross, d, y, halfAcross);
-      }
-      const indices = [];
-      for (let j = 0; j < steps; j++) {
-        const a = j * 2;
-        indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
-      }
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      geo.setIndex(indices);
-      geo.computeVertexNormals();
-      const hump = groundLayer(new THREE.Mesh(geo, patch), LAYER.paint);
-      hump.material.depthWrite = true;
-      hump.receiveShadow = true;
-      const split = groundLayer(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.01, halfAcross * 1.6), crack), LAYER.decal);
-      split.position.set(0.2, HEAVE_HEIGHT + 0.035, 0);
-      split.rotation.y = 0.08;
-      const group = new THREE.Group();
-      group.add(hump, split);
-      group.position.set(pose.x, 0, pose.z);
-      group.quaternion.copy(heading);
-      this.scene.add(group);
-
-      // Yellow BUMP sign on the right shoulder, 120 m before.
-      const signPose = sampleAt(c, s - 120, c.width(0) / 2 + RIGHT_SHOULDER + 1);
-      const sign = buildDiamondSign(['BUMP'], '#f2c200');
-      sign.position.set(signPose.x, 0, signPose.z);
-      sign.quaternion.setFromAxisAngle(Y_AXIS, signPose.heading);
-      this.scene.add(sign);
-
-      this.heaves.push({ s, body, objects: [group, sign], announced: false });
+    // Visible hump in road-local axes: the top surface plus both ends filled in.
+    const steps = 40;
+    const profile = [];
+    for (let j = 0; j <= steps; j++) {
+      const d = -HEAVE_LENGTH / 2 + (HEAVE_LENGTH * j) / steps;
+      profile.push([d, Math.max(0, Math.sqrt(radius * radius - d * d) - (radius - HEAVE_HEIGHT)) + 0.03]);
     }
+    const positions = [];
+    const indices = [];
+    for (const [d, y] of profile) positions.push(d, y, -halfAcross, d, y, halfAcross);
+    for (let j = 0; j < steps; j++) {
+      const a = j * 2;
+      indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+    }
+    for (const z of [-halfAcross, halfAcross]) {
+      const base = positions.length / 3;
+      for (const [d, y] of profile) positions.push(d, y, z, d, 0, z);
+      for (let j = 0; j < steps; j++) {
+        const a = base + j * 2;
+        indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+      }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    const patch = new THREE.MeshStandardMaterial({ color: 0x47484b, roughness: 0.95, side: THREE.DoubleSide });
+    const hump = groundLayer(new THREE.Mesh(geo, patch), LAYER.paint);
+    hump.material.depthWrite = true;
+    hump.castShadow = hump.receiveShadow = true;
+    const crack = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 1 });
+    const split = groundLayer(new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.01, halfAcross * 1.6), crack), LAYER.decal);
+    split.position.set(0.3, HEAVE_HEIGHT + 0.035, 0);
+    split.rotation.y = 0.08;
+    const group = new THREE.Group();
+    group.add(hump, split);
+    group.position.set(pose.x, 0, pose.z);
+    group.quaternion.copy(heading);
+    this.scene.add(group);
+
+    // Yellow BIG BUMP sign on the right shoulder, 150 m before.
+    const signPose = sampleAt(c, s - 150, c.width(0) / 2 + RIGHT_SHOULDER + 1);
+    const sign = buildDiamondSign(['BIG', 'BUMP'], '#f2c200');
+    sign.position.set(signPose.x, 0, signPose.z);
+    sign.quaternion.setFromAxisAngle(Y_AXIS, signPose.heading);
+    this.scene.add(sign);
+
+    this.heaves.push({ s, body, objects: [group, sign], announced: false });
+  }
+
+  // Where the road runs straightest for a good run-up and landing, away from
+  // the start and the bridges.
+  straightestSpot() {
+    const c = this.ours;
+    const heading = (s) => {
+      const i = sampleAt(c, s).index;
+      return Math.atan2(c.tangents[i * 2 + 1], c.tangents[i * 2]);
+    };
+    let best = this.length / 2;
+    let bestScore = Infinity;
+    for (let s = 400; s < this.length - 400; s += 15) {
+      const nearBridge = [-200, -100, 0, 100, 200].some((d) => c.points[sampleAt(c, s + d).index][3] === 1);
+      if (nearBridge) continue;
+      let turning = 0;
+      for (let d = -200; d < 150; d += 25) {
+        let a = heading(s + d + 25) - heading(s + d);
+        a = Math.atan2(Math.sin(a), Math.cos(a));
+        turning += Math.abs(a);
+      }
+      if (turning < bestScore) {
+        bestScore = turning;
+        best = s;
+      }
+    }
+    return best;
   }
 
   // ---------------------------------------------------------------- closures
@@ -523,7 +551,7 @@ export class Hazards {
   checkFrostHeaves(speed) {
     for (const h of this.heaves) {
       const past = gap(this.length, h.s, this.playerS);
-      if (!h.announced && past < 6 && speed > 20 && !this.car.onGrass) {
+      if (!h.announced && past < 10 && speed > 20 && !this.car.onGrass) {
         h.announced = true;
         this.shake = Math.max(this.shake, 0.6);
         this.toast(pick(FROST_HEAVE_LINES), 2.5);

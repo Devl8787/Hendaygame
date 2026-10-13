@@ -44,7 +44,7 @@ Road data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributo
 | S / ↓ | Brake, then reverse once stopped |
 | A / D or ← / → | Steer |
 | Space | Handbrake (drift) |
-| R | Put the car back in the right lane of the nearest road |
+| R | Put the car back on the road, facing the race direction (automatic if you're upside down) |
 | C | Switch chase / driver camera |
 | Enter | Restart the race |
 
@@ -53,8 +53,8 @@ infield or reversing over the line doesn't count. Your best lap is saved in the
 browser.
 
 Hazards: traffic (including semis and a left-lane camper), wrong-way drivers
-that line up on your lane (one more every lap), potholes, frost heaves that
-give you air, work zones with a crew and an excavator that move every lap, and
+that line up on your lane (one more every lap), potholes, one giant frost
+heave on the straightest stretch (about a second of air at 200 km/h), work zones with a crew and an excavator that move every lap, and
 grass that slows you to ~90 km/h.
 
 The North Saskatchewan river valley crosses the loop where the real Henday
