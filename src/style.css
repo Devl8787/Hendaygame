@@ -68,3 +68,44 @@ canvas {
   height: 200px;
   border-radius: 8px;
 }
+
+#race-hud {
+  position: absolute;
+  right: 24px;
+  top: 12px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#race-lap {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+#race-time {
+  font-size: 40px;
+  font-weight: 700;
+}
+
+#race-best {
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+#banner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 36%;
+  text-align: center;
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+#banner small {
+  display: block;
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 600;
+}

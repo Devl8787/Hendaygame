@@ -15,9 +15,10 @@ const WHEEL_POSITIONS = [
 const FRONT = [0, 1];
 const REAR = [2, 3];
 
-const ENGINE_FORCE = 3800;
-// Air drag (N per (m/s)^2) and rolling resistance; tops out near 180 km/h.
-const DRAG = 1.5;
+const ENGINE_FORCE = 5200;
+const TOP_SPEED = 200 / 3.6; // m/s; the engine cuts out above this
+// Air drag (N per (m/s)^2) and rolling resistance.
+const DRAG = 0.9;
 const ROLLING = 30;
 const REVERSE_FORCE = 2000;
 const BRAKE_FORCE = 60;
@@ -95,7 +96,7 @@ export class Car {
     // S brakes while moving forward and reverses once (nearly) stopped.
     let engine = 0;
     let brake = 0;
-    if (input.throttle) engine = speed < -1 ? 0 : ENGINE_FORCE;
+    if (input.throttle) engine = speed < -1 || speed > TOP_SPEED ? 0 : ENGINE_FORCE;
     if (input.throttle && speed < -1) brake = BRAKE_FORCE;
     if (input.brake) {
       if (speed > 1) brake = BRAKE_FORCE;

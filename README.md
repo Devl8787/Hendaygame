@@ -23,8 +23,11 @@ npm run fetch-henday
 ```
 
 This saves the raw map data to `data/henday-osm.json` and builds the track
-into `public/henday-track.json`. Restart `npm run dev` (or refresh the page)
-and you're on the real ~78 km loop. To rebuild the track from the saved data
+into `public/henday-track.json`. Refresh the page and you're racing the Henday.
+
+The real loop is ~78 km (a 47-minute lap), so the game shrinks it to a ~4 km
+loop with the same shape, about a 1.5-minute lap at up to 200 km/h. Lanes stay
+full size. To drive the real-length loop, open http://localhost:5173/?full. To rebuild the track from the saved data
 without downloading again: `npm run fetch-henday -- --offline`.
 
 Road data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
@@ -37,6 +40,11 @@ Road data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributo
 | Space | Handbrake (drift) |
 | R | Put the car back in the right lane of the nearest road |
 | C | Switch chase / driver camera |
+| Enter | Restart the race |
+
+A race is 3 laps. The loop is split into checkpoints, so cutting across the
+infield or reversing over the line doesn't count. Your best lap is saved in the
+browser.
 
 ## How it fits together
 
@@ -46,6 +54,7 @@ Road data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributo
 | `src/track.js` | Loads the Henday track (or the test strip if it hasn't been downloaded). |
 | `src/world.js` | Builds the scenery from the track: asphalt, lane lines, bridge barriers, light poles, knock-over cones. |
 | `src/minimap.js` | The map in the corner. |
+| `src/race.js` | Countdown, laps, checkpoints, lap timer, best lap, wrong-way warning. |
 | `scripts/fetch-henday.mjs` | Downloads the Henday from OpenStreetMap's Overpass API. |
 | `scripts/osm-to-track.mjs` | Stitches the OpenStreetMap road pieces into one loop per direction, in metres. |
 | `src/car.js` | The car: a Rapier ray-cast vehicle (box chassis + 4 spring wheels), engine, brakes, steering, drag. |
@@ -58,7 +67,7 @@ then copied to its body's position and rotation.
 
 1. ✅ Three.js + Rapier: drivable car on a test highway
 2. ✅ Import the real Henday route from OpenStreetMap
-3. Laps, checkpoints and a timer
+3. ✅ Laps, checkpoints and a timer (on a ~4 km scaled-down Henday)
 4. Hazards: potholes, road closures, traffic, wrong-way drivers
 5. Music and sound
 6. Optional Google Photorealistic 3D Tiles for scenery

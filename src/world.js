@@ -22,6 +22,7 @@ export function createWorld(scene, world, track) {
   addGround(scene, world, track);
   track.carriageways.forEach((c) => addCarriageway(scene, c));
   addLightPoles(scene, track);
+  if (track.carriageways[0].closed) addStartFinish(scene, track.carriageways[0]);
   return { cones: addLaneClosure(scene, world, track.carriageways[0]) };
 }
 
@@ -184,6 +185,90 @@ function addLightPoles(scene, track) {
   const m = new THREE.Matrix4();
   spots.forEach((p, i) => poles.setMatrixAt(i, m.makeTranslation(p.x, 0, p.z)));
   scene.add(poles);
+}
+
+// Checkered line across the road at point 0, with a gantry overhead.
+function addStartFinish(scene, c) {
+  const width = c.width(0) + LEFT_SHOULDER + RIGHT_SHOULDER;
+  const centre = (RIGHT_SHOULDER - LEFT_SHOULDER) / 2;
+  const square = 0.75;
+  const across = Math.round(width / square);
+  const pose = poseAt(c, 0, centre);
+  const heading = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), pose.heading);
+
+  // Car-local frame: +x along the road, +z to the right.
+  const toWorld = (along, right, y) =>
+    new THREE.Vector3(along, y, right).applyQuaternion(heading).add(new THREE.Vector3(pose.x, 0, pose.z));
+
+  const geo = new THREE.PlaneGeometry(square, square);
+  geo.rotateX(-Math.PI / 2);
+  const colours = [0xf4f4f4, 0x111111].map((color) => {
+    const mesh = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ color }), across * 2);
+    mesh.count = 0;
+    return mesh;
+  });
+  const m = new THREE.Matrix4();
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < across; col++) {
+      const mesh = colours[(row + col) % 2];
+      const at = toWorld((row - 0.5) * square, (col - (across - 1) / 2) * square, 0.04);
+      mesh.setMatrixAt(mesh.count++, m.compose(at, heading, new THREE.Vector3(1, 1, 1)));
+    }
+  }
+  for (const mesh of colours) {
+    mesh.receiveShadow = true;
+    scene.add(groundLayer(mesh, LAYER.paint));
+  }
+
+  // Gantry: two posts and a beam carrying the banner.
+  const steel = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, metalness: 0.6, roughness: 0.4 });
+  const height = 7;
+  const span = width + 2;
+  const gantry = new THREE.Group();
+  for (const side of [-1, 1]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.4, height, 0.4), steel);
+    post.position.set(0, height / 2, (side * span) / 2);
+    gantry.add(post);
+  }
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, span), steel);
+  beam.position.set(0, height, 0);
+  gantry.add(beam);
+  const banner = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.6, span * 0.8), bannerMaterials());
+  banner.position.set(0, height - 1.1, 0);
+  gantry.add(banner);
+  gantry.position.copy(toWorld(0, 0, 0));
+  gantry.quaternion.copy(heading);
+  gantry.traverse((o) => (o.castShadow = true));
+  scene.add(gantry);
+}
+
+// Green highway-sign banner with text on both faces (blank when there's no DOM, e.g. in tests).
+function bannerMaterials() {
+  const green = new THREE.MeshStandardMaterial({ color: 0x0b6b3a });
+  if (typeof document === 'undefined') return green;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0b6b3a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const text = 'HENDAY 500 · START / FINISH';
+  let size = 72;
+  do ctx.font = `bold ${size--}px system-ui, sans-serif`;
+  while (ctx.measureText(text).width > canvas.width - 80);
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 4);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  const sign = new THREE.MeshStandardMaterial({ map: texture });
+  // Box faces: +x, -x, +y, -y, +z, -z. The text goes on the faces looking along the road.
+  return [sign, sign, green, green, green, green];
 }
 
 // Cones closing the right-hand lane a few hundred metres past the start:

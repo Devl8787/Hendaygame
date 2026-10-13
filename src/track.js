@@ -6,17 +6,119 @@
 
 export const LANE_WIDTH = 3.7;
 
+// The real Henday is ~78 km: a 47-minute lap. Racing on it, we shrink the loop
+// (keeping its shape) so a lap at up to 200 km/h takes about a minute and a half.
+// Lanes stay full size. Add ?full to the URL to drive the real-length loop.
+const RACE_LAP_LENGTH = 4000; // metres
+const RACE_LANES = 3;
+const MEDIAN_WIDTH = 12;
+const SPACING = 3;
+
 export async function loadTrack() {
   try {
-    const res = await fetch(`${import.meta.env.BASE_URL}henday-track.json`);
+    const res = await fetch(`${import.meta.env?.BASE_URL ?? '/'}henday-track.json`);
     // Vite's dev server answers missing files with index.html, so check the type too.
     if (res.ok && res.headers.get('content-type')?.includes('json')) {
-      return prepare(await res.json(), false);
+      const track = await res.json();
+      const full = new URLSearchParams(window.location.search).has('full');
+      return prepare(full ? track : compress(track, RACE_LAP_LENGTH), false);
     }
   } catch {
     // Fall through to the test strip.
   }
   return prepare(testStrip(), true);
+}
+
+// Scales the clockwise carriageway down to `lapLength` and rebuilds both
+// directions either side of it as a divided highway.
+function compress(track, lapLength) {
+  const source = track.carriageways[0];
+  if (!source.closed) return track;
+
+  let pts = source.points.map(([x, z]) => [x, z]);
+  const scale = lapLength / loopLength(pts);
+  const [cx, cz] = centroid(pts);
+  pts = pts.map(([x, z]) => [(x - cx) * scale, (z - cz) * scale]);
+  // Shrinking turns gentle real-world wiggles into kinks; resample and smooth them out.
+  const centre = smoothLoop(resampleLoop(pts, SPACING), 12);
+
+  const half = (RACE_LANES * LANE_WIDTH) / 2;
+  const offset = MEDIAN_WIDTH / 2 + half;
+  const along = offsetLoop(centre, offset);
+  const against = offsetLoop(centre, -offset).reverse();
+  const toPoints = (line) => line.map(([x, z]) => [x, z, RACE_LANES, 0]);
+
+  return {
+    ...track,
+    carriageways: [
+      { name: 'Clockwise', closed: true, length: Math.round(loopLength(along)), points: toPoints(along) },
+      { name: 'Counter-clockwise', closed: true, length: Math.round(loopLength(against)), points: toPoints(against) },
+    ],
+  };
+}
+
+function loopLength(pts) {
+  let len = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+    len += Math.hypot(b[0] - a[0], b[1] - a[1]);
+  }
+  return len;
+}
+
+function centroid(pts) {
+  let x = 0;
+  let z = 0;
+  for (const p of pts) {
+    x += p[0];
+    z += p[1];
+  }
+  return [x / pts.length, z / pts.length];
+}
+
+function resampleLoop(pts, spacing) {
+  const out = [];
+  let carry = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    let t = carry;
+    while (t < len) {
+      out.push([a[0] + ((b[0] - a[0]) * t) / len, a[1] + ((b[1] - a[1]) * t) / len]);
+      t += spacing;
+    }
+    carry = t - len;
+  }
+  return out;
+}
+
+function smoothLoop(pts, radius) {
+  const n = pts.length;
+  return pts.map((_, i) => {
+    let x = 0;
+    let z = 0;
+    for (let k = -radius; k <= radius; k++) {
+      const p = pts[(i + k + n) % n];
+      x += p[0];
+      z += p[1];
+    }
+    return [x / (2 * radius + 1), z / (2 * radius + 1)];
+  });
+}
+
+// Shifts a loop sideways: positive = to the right of the direction of travel.
+function offsetLoop(pts, offset) {
+  const n = pts.length;
+  return pts.map(([x, z], i) => {
+    const prev = pts[(i - 1 + n) % n];
+    const next = pts[(i + 1) % n];
+    const dx = next[0] - prev[0];
+    const dz = next[1] - prev[1];
+    const len = Math.hypot(dx, dz) || 1;
+    return [x - (dz / len) * offset, z + (dx / len) * offset];
+  });
 }
 
 function testStrip() {
