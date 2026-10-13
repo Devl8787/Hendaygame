@@ -3,6 +3,7 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import { LANE_WIDTH, sampleAt } from './track.js';
 import { buildCarMesh, addStaticWheels, CAR_SIZE } from './car.js';
 import { LEFT_SHOULDER, RIGHT_SHOULDER } from './world.js';
+import { buildWorkZone, removeWorkZone, animateWorkZone } from './construction.js';
 
 // Everything that makes the Henday the Henday: traffic, wrong-way drivers,
 // potholes, lane closures that move every lap, and grass that slows you down.
@@ -14,7 +15,16 @@ const SEMIS = 2; // of the traffic above
 const ONCOMING = 8; // other side of the median
 const START_ZONE = [-120, 250]; // metres around the start line kept clear
 const LANE_CHANGE_TIME = 1.4; // seconds to move one lane over
-const AI_THINK = 0.25; // seconds between traffic decisions
+const WRONG_WAY_LANE_CHANGE_TIME = 0.8;
+// Wrong-way drivers line up on your lane between these distances (metres),
+// then hold their line, so you get ~1.2 s to dodge at a combined ~320 km/h.
+const AIM_RANGE = 380;
+const AIM_COMMIT = 110;
+// Lane positions just onto each shoulder, for bailing out of a head-on.
+const SHOULDER_LANES = { 0: -0.75, 2: 2.75 };
+const AI_THINK = 0.12; // seconds between traffic decisions
+const HARD_BRAKE = 7; // m/s², for the stopping-distance speed cap
+const SAFE_GAP = 2; // metres kept between bumpers
 
 const POTHOLE_LINES = [
   "That's a $900 alignment.",
@@ -23,6 +33,15 @@ const POTHOLE_LINES = [
   "Edmonton's official speed bump.",
   "It's been there since 2016.",
   'The city has been notified. Again.',
+];
+
+const CONSTRUCTION_LINES = [
+  'ROAD WORK: 1 worker digging, 4 supervising.',
+  'CONSTRUCTION SEASON: month 11 of 12.',
+  'Fines double in work zones. So does your commute.',
+  'Lane closed since 2019. Estimated completion: 2031.',
+  'Detour ahead! (There is no detour.)',
+  'Crew on coffee break. Lane still closed.',
 ];
 
 const VEHICLE_KINDS = {
@@ -136,37 +155,19 @@ export class Hazards {
 
   // ---------------------------------------------------------------- closures
 
-  // Cones taper across one outside lane, then run along it.
+  // Work zones closing an outside lane, away from the player and each other.
   placeClosures(avoidS) {
-    const coneGeo = new THREE.ConeGeometry(0.2, 0.7, 12);
-    const coneMat = new THREE.MeshStandardMaterial({ color: 0xff6a00 });
     for (let k = 0; k < CLOSURES_PER_LAP; k++) {
       let s;
       do s = this.randomS();
-      while (gap(this.length, avoidS, s) < 200 || this.closures.some((c) => Math.abs(c.s - s) < 300));
+      while (gap(this.length, avoidS, s) < 250 || this.closures.some((c) => Math.abs(c.s - s) < 400));
       const lane = Math.random() < 0.5 ? 0 : 2;
-      const closure = { s, lane, length: 140, cones: [] };
-      const taper = 50;
-      for (let d = 0; d <= closure.length; d += 7) {
-        // 0 at the lane's outer edge, 1 at the lane line we're closing off.
-        const f = Math.min(d / taper, 1);
-        const edge = lane === 0 ? -1 : 1;
-        const width = this.ours.width(sampleAt(this.ours, s + d).index);
-        const offset = edge * (width / 2 - 0.3 - f * (LANE_WIDTH - 0.6));
-        const pose = sampleAt(this.ours, s + d, offset);
-        const body = this.world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(pose.x, 0.35, pose.z));
-        this.world.createCollider(RAPIER.ColliderDesc.cone(0.35, 0.2).setDensity(40), body);
-        const mesh = new THREE.Mesh(coneGeo, coneMat);
-        mesh.castShadow = true;
-        this.scene.add(mesh);
-        closure.cones.push({ body, mesh });
-      }
-      this.closures.push(closure);
+      this.closures.push(buildWorkZone(this.scene, this.world, this.ours, s, lane));
     }
   }
 
   removeClosures() {
-    for (const c of this.closures) for (const cone of c.cones) this.removeBody(cone);
+    for (const zone of this.closures) removeWorkZone(this.scene, this.world, zone);
     this.closures = [];
   }
 
@@ -193,16 +194,33 @@ export class Hazards {
   spawnWrongWay(count) {
     let have = this.vehicles.filter((v) => v.wrongWay).length;
     while (have++ < count) {
-      // Somewhere well up the road from the player, heading straight at them.
-      this.addVehicle({
-        c: this.ours,
-        kind: 'car',
-        lane: randInt(0, 2),
-        cruise: kmh(rand(95, 110)),
-        dir: -1,
-        wrongWay: true,
-        s: this.playerS + rand(700, this.length - 500),
-      });
+      // Somewhere well up the road from the player, heading straight at them,
+      // with nobody else in that lane nearby.
+      let s;
+      let lane;
+      for (let tries = 0; tries < 50; tries++) {
+        s = this.playerS + rand(700, this.length - 500);
+        lane = randInt(0, 2);
+        const L = this.length;
+        if (this.vehicles.every((o) => o.c !== this.ours || !inLane(o, lane, 0.9) || Math.min(gap(L, s, o.s), gap(L, o.s, s)) > 120)) break;
+      }
+      this.addVehicle({ c: this.ours, kind: 'car', lane, cruise: kmh(rand(115, 135)), dir: -1, wrongWay: true, s });
+    }
+  }
+
+  // A wrong-way driver stuck nose-to-nose for a while gets pulled over and
+  // replaced by a fresh one further up the road.
+  pullOverStuck(dt) {
+    for (const v of [...this.vehicles]) {
+      if (!v.wrongWay) continue;
+      v.stuck = v.speed < 2 ? (v.stuck ?? 0) + dt : 0;
+      if (v.stuck < 3) continue;
+      this.removeBody(v);
+      this.vehicles.splice(this.vehicles.indexOf(v), 1);
+      if (gap(this.length, v.s, this.playerS) < 300 || gap(this.length, this.playerS, v.s) < 300) {
+        this.toast('Police have pulled over a wrong-way driver. Another one is out there.', 3);
+      }
+      this.spawnWrongWay(this.vehicles.filter((o) => o.wrongWay).length + 1);
     }
   }
 
@@ -241,6 +259,7 @@ export class Hazards {
 
   // Fixed-step update: move every vehicle along its lane.
   step(dt) {
+    this.pullOverStuck(dt);
     for (const v of this.vehicles) {
       v.think -= dt;
       if (v.think <= 0) {
@@ -248,10 +267,30 @@ export class Hazards {
         this.decide(v);
       }
       v.speed += THREE.MathUtils.clamp(v.target - v.speed, -8 * dt, 3 * dt);
+      v.speed = Math.max(0, Math.min(v.speed, this.safeSpeed(v)));
       v.s += v.speed * v.dir * dt;
-      v.laneNow += THREE.MathUtils.clamp(v.lane - v.laneNow, -dt / LANE_CHANGE_TIME, dt / LANE_CHANGE_TIME);
+      const laneStep = dt / (v.wrongWay ? WRONG_WAY_LANE_CHANGE_TIME : LANE_CHANGE_TIME);
+      v.laneNow += THREE.MathUtils.clamp(v.lane - v.laneNow, -laneStep, laneStep);
       this.placeVehicle(v);
     }
+  }
+
+  // The fastest v can go and still stop in time for whatever is in its lane:
+  // behind a slower car, or (sharing the gap) for something coming head-on.
+  // Checked every physics step, so AI vehicles never drive through each other.
+  safeSpeed(v) {
+    let cap = Infinity;
+    const L = this.lengthOf(v.c);
+    for (const o of this.vehicles) {
+      if (o === v || o.c !== v.c) continue;
+      if (Math.abs(o.laneNow - v.laneNow) > 0.7 && o.lane !== v.lane) continue;
+      const g = gap(L, v.s * v.dir, o.s * v.dir) - v.size.halfLength - o.size.halfLength - SAFE_GAP;
+      if (g > 160) continue;
+      const room = Math.max(0, o.dir === v.dir ? g : g / 2);
+      const stop = Math.sqrt(2 * HARD_BRAKE * room);
+      cap = Math.min(cap, o.dir === v.dir ? o.speed + stop : stop);
+    }
+    return cap;
   }
 
   placeVehicle(v) {
@@ -266,21 +305,55 @@ export class Hazards {
   }
 
   // Simple driver: keep cruising; if something's in the way, pass it if
-  // there's room, otherwise slow down behind it. Campers never change lanes.
+  // there's room, otherwise slow down behind it. Campers never change lanes
+  // (unless something is coming at them head-on).
   decide(v) {
     v.target = v.cruise;
-    const ahead = this.blocker(v, v.lane);
+    if (v.wrongWay) this.aimAtPlayer(v);
+    // Watch both the lane we're in and the one we're moving into.
+    const lanes = [...new Set([v.lane, Math.round(v.laneNow)])];
+    let ahead = lanes.map((l) => this.blocker(v, l)).reduce((a, b) => (!a || (b && b.gap < a.gap) ? b : a), null);
+    // A wrong-way driver lined up on the player holds their line and leaves the
+    // dodging to everyone else, swerving only at the last moment.
+    if (ahead && v.wrongWay && this.hunting(v) && ahead.gap > 90) ahead = null;
     if (ahead) {
-      const options = v.camper ? [] : [v.lane - 1, v.lane + 1].filter((l) => l >= 0 && l <= 2);
+      // Campers won't move over for anyone... except a head-on collision.
+      const stubborn = v.camper && !ahead.closing;
+      const settled = v.lane === v.laneNow || ahead.closing;
+      const here = Math.round(v.laneNow);
+      const options = stubborn ? [] : [here - 1, here + 1].filter((l) => l >= 0 && l <= 2);
       // Pass on the left when we can, like the signs say.
       options.sort((a, b) => a - b);
       const free = options.find((l) => this.laneClear(v, l));
-      if (free !== undefined && v.lane === v.laneNow) v.lane = free;
-      else v.target = Math.min(v.cruise, ahead.speed ?? 0, ahead.gap < 12 ? 0 : Infinity);
-    } else if (!v.camper && !v.wrongWay && v.lane < 2 && v.lane === v.laneNow && Math.random() < 0.15) {
+      if (free !== undefined && settled) v.lane = free;
+      else if (ahead.closing && ahead.gap < 90 && !v.wrongWay && SHOULDER_LANES[here] !== undefined) {
+        // Nowhere to go and something's coming head-on: bail onto the shoulder.
+        v.lane = SHOULDER_LANES[here];
+        v.target = Math.min(v.cruise, kmh(60));
+      } else v.target = Math.min(v.cruise, ahead.speed ?? 0, ahead.gap < 12 ? 0 : Infinity);
+    } else if (v.lane % 1 !== 0) {
+      // Back off the shoulder once the danger has passed.
+      v.lane = Math.round(Math.min(Math.max(v.lane, 0), 2));
+    } else if (!v.camper && !v.wrongWay && v.lane < 2 && v.lane === v.laneNow && Math.random() < 0.06) {
       // Keep right except to pass.
       if (this.laneClear(v, v.lane + 1, 70)) v.lane += 1;
     }
+  }
+
+  // Wrong-way drivers drift into the player's lane as they close in, one lane
+  // at a time, then commit. They still dodge other traffic (see decide).
+  hunting(v) {
+    return v.c === this.ours && gap(this.length, v.s * v.dir, this.playerS * v.dir) < AIM_RANGE;
+  }
+
+  aimAtPlayer(v) {
+    if (v.c !== this.ours) return;
+    const g = gap(this.length, v.s * v.dir, this.playerS * v.dir);
+    if (g < AIM_COMMIT || g > AIM_RANGE || v.lane !== v.laneNow) return;
+    const want = THREE.MathUtils.clamp(Math.round(this.playerLane()), 0, 2);
+    if (want === v.lane) return;
+    const next = v.lane + Math.sign(want - v.lane);
+    if (this.laneClear(v, next, 45, 60)) v.lane = next;
   }
 
   // Nearest thing ahead in `lane` worth reacting to: { gap, speed } or null.
@@ -292,7 +365,7 @@ export class Hazards {
       const closing = o.dir !== v.dir;
       const look = closing ? 160 : 45;
       if (g > look || (!closing && o.speed >= v.speed && g > 15)) continue;
-      if (!best || g < best.gap) best = { gap: g, speed: closing ? 0 : o.speed };
+      if (!best || g < best.gap) best = { gap: g, speed: closing ? 0 : o.speed, closing };
     }
     if (v.c === this.ours) {
       for (const c of this.closures) {
@@ -305,13 +378,13 @@ export class Hazards {
     return best;
   }
 
-  laneClear(v, lane, ahead = 45) {
+  laneClear(v, lane, ahead = 45, oncoming = 200) {
     const L = this.lengthOf(v.c);
     for (const o of this.vehicles) {
       if (o === v || o.c !== v.c || !inLane(o, lane, 0.9)) continue;
       const g = gap(L, v.s * v.dir, o.s * v.dir);
       const behind = L - g;
-      const reach = o.dir !== v.dir ? 200 : ahead;
+      const reach = o.dir !== v.dir ? oncoming : ahead;
       if (g < reach + o.size.halfLength || behind < 20 + o.size.halfLength) return false;
     }
     if (v.c === this.ours) {
@@ -343,10 +416,12 @@ export class Hazards {
     this.checkPotholes(dt);
     this.radioChatter();
 
-    for (const closure of this.closures) {
-      for (const cone of closure.cones) {
-        cone.mesh.position.copy(cone.body.translation());
-        cone.mesh.quaternion.copy(cone.body.rotation());
+    const time = performance.now() / 1000;
+    for (const zone of this.closures) {
+      animateWorkZone(zone, time);
+      if (!zone.announced && gap(this.length, this.playerS, zone.s) < 280) {
+        zone.announced = true;
+        this.toast(pick(CONSTRUCTION_LINES), 3);
       }
     }
     // Wrong-way drivers flash their high beams.

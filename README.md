@@ -6,6 +6,12 @@ Built with [Three.js](https://threejs.org/) for graphics and
 
 ## Run it
 
+On Windows, double-click **`Play Henday.bat`**. It updates the game, installs
+what it needs, downloads the Henday map the first time, and opens the game in
+your browser. Keep its window open while you play.
+
+Or from a terminal:
+
 ```bash
 npm install
 npm run dev
@@ -47,8 +53,8 @@ infield or reversing over the line doesn't count. Your best lap is saved in the
 browser.
 
 Hazards: traffic (including semis and a left-lane camper), wrong-way drivers
-(one more every lap), potholes, lane closures that move every lap, and grass
-that slows you to ~90 km/h.
+that line up on your lane (one more every lap), potholes, work zones with a
+crew and an excavator that move every lap, and grass that slows you to ~90 km/h.
 
 ## How it fits together
 
@@ -60,6 +66,7 @@ that slows you to ~90 km/h.
 | `src/minimap.js` | The map in the corner. |
 | `src/race.js` | Countdown, laps, checkpoints, lap timer, best lap, wrong-way warning. |
 | `src/hazards.js` | Traffic and its lane-changing AI, wrong-way drivers, potholes, moving lane closures, grass. |
+| `src/construction.js` | Work zones: sign, arrow board, cones, barriers, excavator and crew. |
 | `scripts/fetch-henday.mjs` | Downloads the Henday from OpenStreetMap's Overpass API. |
 | `scripts/osm-to-track.mjs` | Stitches the OpenStreetMap road pieces into one loop per direction, in metres. |
 | `src/car.js` | The car: a Rapier ray-cast vehicle (box chassis + 4 spring wheels), engine, brakes, steering, drag. |
@@ -74,7 +81,7 @@ then copied to its body's position and rotation.
 2. ✅ Import the real Henday route from OpenStreetMap
 3. ✅ Laps, checkpoints and a timer (on a ~4 km scaled-down Henday)
 4. ✅ Hazards: potholes, road closures, traffic, wrong-way drivers
-5. Hills: the south-west river valley, frost heaves, overpasses
+5. Hills: the south-west and north-east river valleys, frost heaves, overpasses
 6. Music and sound
 7. Graphics pass: textures, lighting, real models (Blender / free assets)
 8. Optional Google Photorealistic 3D Tiles for scenery

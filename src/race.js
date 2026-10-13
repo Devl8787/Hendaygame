@@ -52,6 +52,7 @@ export class Race {
   // pos: car position {x, z}; forward: unit vector {x, z}; speed: m/s.
   update(dt, pos, forward, speed) {
     this.clock += dt;
+    this.index = this.nearestIndex(pos);
     if (this.state === 'countdown') {
       if (this.clock >= 0) {
         this.state = 'racing';
@@ -61,7 +62,6 @@ export class Race {
       return;
     }
 
-    this.index = this.nearestIndex(pos);
     this.trackSectors();
     this.trackWrongWay(dt, forward, speed);
     if (this.message && (this.message.until -= dt) <= 0) this.message = null;
