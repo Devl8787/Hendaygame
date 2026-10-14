@@ -61,13 +61,14 @@ let cameraIndex = 0;
 onPress('KeyC', () => (cameraIndex = (cameraIndex + 1) % CAMERAS.length));
 onPress('KeyR', backOnTheRoad);
 onPress('KeyM', () => radio?.toggleMute());
-onPress('KeyG', () => {
-  const level = graphics.cycleQuality();
+function note(text) {
   const toast = document.getElementById('toast');
-  toast.textContent = `Graphics: ${level}`;
+  toast.textContent = text;
   clearTimeout(toast.hideTimer);
   toast.hideTimer = setTimeout(() => (toast.textContent = ''), 1500);
-});
+}
+onPress('KeyG', () => note(`Graphics: ${graphics.cycleQuality()}`));
+onPress('KeyT', () => note(`Time of day: ${graphics.cycleTime()}`));
 
 // Puts the car back on its wheels. In a race that's always our side of the
 // road, facing the race direction, in the lane nearest to where the car was.

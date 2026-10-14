@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
+import { buildVehicle } from './vehicles.js';
 
 // Rapier's ray-cast vehicle: a box chassis plus four wheels that are rays
 // with springs. Local axes: +x forward, +y up, +z across the axle.
@@ -75,7 +76,13 @@ export class Car {
       this.vehicle.setWheelSideFrictionStiffness(i, 1.0);
     }
 
-    this.mesh = buildCarMesh();
+    // The coupe model sits with its wheels at y = 0; the mesh follows the
+    // chassis centre, so drop the model by the ride height. Its own wheels
+    // are left off: the spinning, steering ones below are the real ones.
+    this.mesh = new THREE.Group();
+    const body = buildVehicle('coupe', 0x9e0a1e, { wheels: false });
+    body.position.y = -RIDE_HEIGHT;
+    this.mesh.add(body);
     scene.add(this.mesh);
     this.wheelMeshes = WHEEL_POSITIONS.map(() => {
       const w = buildWheelMesh();
@@ -164,52 +171,8 @@ export class Car {
   }
 }
 
-// Also used for traffic. `car.userData.headlights` is the headlight material.
-export function buildCarMesh(color = 0x9e0a1e) {
-  const car = new THREE.Group();
-  const paint = new THREE.MeshStandardMaterial({ color, metalness: 0.45, roughness: 0.32 });
-  const glass = new THREE.MeshStandardMaterial({ color: 0x1a2733, metalness: 0.9, roughness: 0.05 });
-  const light = new THREE.MeshStandardMaterial({ color: 0xfff6d0, emissive: 0xfff2b0, emissiveIntensity: 4 });
-  const tail = new THREE.MeshStandardMaterial({ color: 0x990000, emissive: 0xff0000, emissiveIntensity: 3 });
-
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(CHASSIS.halfLength * 2, CHASSIS.halfHeight * 2, CHASSIS.halfWidth * 2),
-    paint,
-  );
-  const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.55, 1.6), glass);
-  cabin.position.set(-0.3, CHASSIS.halfHeight + 0.27, 0);
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.08, 1.62), paint);
-  roof.position.set(-0.4, CHASSIS.halfHeight + 0.56, 0);
-
-  car.add(body, cabin, roof);
-  for (const z of [-0.6, 0.6]) {
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.15, 0.35), light);
-    head.position.set(CHASSIS.halfLength, 0.1, z);
-    const back = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.15, 0.35), tail);
-    back.position.set(-CHASSIS.halfLength, 0.1, z);
-    car.add(head, back);
-  }
-  car.traverse((o) => (o.castShadow = true));
-  car.userData.headlights = light;
-  return car;
-}
-
-// Wheels on the ground for a car body built by buildCarMesh (traffic doesn't spin them).
-export function addStaticWheels(car) {
-  for (const [x, z] of WHEEL_POSITIONS) {
-    const wheel = buildWheelMesh();
-    wheel.position.set(x, WHEEL.radius - CAR_SIZE.rideHeight, z);
-    car.add(wheel);
-  }
-  return car;
-}
-
-export const CAR_SIZE = {
-  halfLength: CHASSIS.halfLength,
-  halfWidth: CHASSIS.halfWidth,
-  // Height of the chassis centre above the road once the springs settle (measured).
-  rideHeight: 0.91,
-};
+// Height of the chassis centre above the road once the springs settle (measured).
+const RIDE_HEIGHT = 0.91;
 
 function buildWheelMesh() {
   const wheel = new THREE.Group();

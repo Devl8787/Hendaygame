@@ -124,13 +124,15 @@ function downtownSpot(terrain) {
 
 function addDowntown(scene, terrain, spot) {
   const windows = windowsTexture();
+  // Lit windows glow brighter as the light goes (see Graphics.setTime).
+  scene.userData.glowing ??= [];
   const glass = (repeatX, repeatY) => {
     const map = windows?.clone();
     if (map) {
       map.repeat.set(repeatX, repeatY);
       map.needsUpdate = true;
     }
-    return new THREE.MeshStandardMaterial({
+    const material = new THREE.MeshStandardMaterial({
       color: 0xb8c6d4,
       map,
       emissive: 0xffffff,
@@ -139,6 +141,8 @@ function addDowntown(scene, terrain, spot) {
       metalness: 0.4,
       roughness: 0.35,
     });
+    if (map) scene.userData.glowing.push({ material, day: 0.35, sunset: 0.9 });
+    return material;
   };
   const roof = new THREE.MeshStandardMaterial({ color: 0x6d7378, roughness: 0.8 });
   const [cx, cz] = spot.centre;

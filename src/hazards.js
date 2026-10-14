@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { LANE_WIDTH, sampleAt } from './track.js';
-import { buildCarMesh, addStaticWheels, CAR_SIZE } from './car.js';
+import { buildVehicle, VEHICLE_SIZES } from './vehicles.js';
 import { LEFT_SHOULDER, RIGHT_SHOULDER, groundLayer, LAYER } from './world.js';
 import { buildWorkZone, removeWorkZone, animateWorkZone, buildDiamondSign } from './construction.js';
 
@@ -54,10 +54,9 @@ const CONSTRUCTION_LINES = [
   'Crew on coffee break. Lane still closed.',
 ];
 
-const VEHICLE_KINDS = {
-  car: { halfLength: CAR_SIZE.halfLength, halfWidth: CAR_SIZE.halfWidth, halfHeight: 0.75 },
-  semi: { halfLength: 8, halfWidth: 1.3, halfHeight: 2 },
-};
+// Everyday Henday traffic: lots of pickups, it's Alberta.
+const CAR_TYPES = ['pickup', 'pickup', 'pickup', 'sedan', 'sedan', 'suv', 'suv', 'hatch'];
+const SEMI_COLOURS = [0x9b1c1c, 0x1c3f9b, 0x2b2b2b, 0xf2f2f2, 0x1e5b34];
 const CAR_COLOURS = [0xf2f2f2, 0x1d1d1f, 0x8a9199, 0x1f4e8c, 0x2e6b3a, 0xd9c48a, 0x5b2333, 0x3d6f8f];
 
 export class Hazards {
@@ -301,14 +300,14 @@ export class Hazards {
       const camper = k === SEMIS;
       this.addVehicle({
         c: this.ours,
-        kind: semi ? 'semi' : 'car',
+        kind: semi ? 'semi' : camper ? 'sedan' : pick(CAR_TYPES),
         lane: semi ? 2 : camper ? 0 : randInt(0, 2),
         cruise: kmh(semi ? rand(85, 95) : camper ? 88 : rand(95, 125)),
         camper,
       });
     }
     for (let k = 0; k < ONCOMING; k++) {
-      this.addVehicle({ c: this.theirs, kind: k === 0 ? 'semi' : 'car', lane: randInt(0, 2), cruise: kmh(rand(95, 125)) });
+      this.addVehicle({ c: this.theirs, kind: k === 0 ? 'semi' : pick(CAR_TYPES), lane: randInt(0, 2), cruise: kmh(rand(95, 125)) });
     }
   }
 
@@ -325,7 +324,7 @@ export class Hazards {
         const L = this.length;
         if (this.vehicles.every((o) => o.c !== this.ours || !inLane(o, lane, 0.9) || Math.min(gap(L, s, o.s), gap(L, o.s, s)) > 120)) break;
       }
-      this.addVehicle({ c: this.ours, kind: 'car', lane, cruise: kmh(rand(115, 135)), dir: -1, wrongWay: true, s });
+      this.addVehicle({ c: this.ours, kind: pick(CAR_TYPES), lane, cruise: kmh(rand(115, 135)), dir: -1, wrongWay: true, s });
     }
   }
 
@@ -346,7 +345,7 @@ export class Hazards {
   }
 
   addVehicle({ c, kind, lane, cruise, dir = 1, camper = false, wrongWay = false, s }) {
-    const size = VEHICLE_KINDS[kind];
+    const size = VEHICLE_SIZES[kind];
     if (s === undefined) {
       // Find a spot clear of the start and of other vehicles in that lane.
       for (let tries = 0; tries < 50; tries++) {
@@ -355,7 +354,7 @@ export class Hazards {
         if (clear) break;
       }
     }
-    const mesh = kind === 'semi' ? buildSemi() : addStaticWheels(buildCarMesh(pick(CAR_COLOURS)));
+    const mesh = buildVehicle(kind, pick(kind === 'semi' ? SEMI_COLOURS : CAR_COLOURS));
     if (wrongWay) {
       // Each wrong-way driver gets their own headlights so they can flash them.
       const lights = mesh.userData.headlights.clone();
@@ -421,10 +420,10 @@ export class Hazards {
     // Nose up or down with the road (it dips toward the river).
     const ahead = sampleAt(v.c, v.s + v.dir * 4, offset);
     v.quaternion.setFromAxisAngle(Y_AXIS, heading).multiply(PITCH.setFromAxisAngle(Z_AXIS, Math.atan2(ahead.y - pose.y, 4)));
-    const y = pose.y + (v.kind === 'semi' ? v.size.halfHeight + 0.1 : CAR_SIZE.rideHeight);
-    v.body.setNextKinematicTranslation({ x: pose.x, y, z: pose.z });
+    // Models sit on the road; the collision box is centred above it.
+    v.body.setNextKinematicTranslation({ x: pose.x, y: pose.y + v.size.halfHeight, z: pose.z });
     v.body.setNextKinematicRotation(v.quaternion);
-    v.mesh.position.set(pose.x, y, pose.z);
+    v.mesh.position.set(pose.x, pose.y, pose.z);
     v.mesh.quaternion.copy(v.quaternion);
   }
 
@@ -685,39 +684,6 @@ function blobGeometry(r) {
   const geo = new THREE.ShapeGeometry(shape);
   geo.rotateX(-Math.PI / 2);
   return geo;
-}
-
-function buildSemi() {
-  const { halfLength, halfWidth, halfHeight } = VEHICLE_KINDS.semi;
-  const truck = new THREE.Group();
-  const trailer = new THREE.Mesh(
-    new THREE.BoxGeometry(halfLength * 2 - 3.2, halfHeight * 2 - 0.9, halfWidth * 2),
-    new THREE.MeshStandardMaterial({ color: 0xd8d8d2, roughness: 0.8 }),
-  );
-  trailer.position.set(-1.6, 0.45, 0);
-  const cab = new THREE.Mesh(
-    new THREE.BoxGeometry(2.8, halfHeight * 2 - 0.6, halfWidth * 2),
-    new THREE.MeshStandardMaterial({ color: pick([0x9b1c1c, 0x1c3f9b, 0x2b2b2b]), metalness: 0.3, roughness: 0.5 }),
-  );
-  cab.position.set(halfLength - 1.4, -0.3, 0);
-  const windshield = new THREE.Mesh(
-    new THREE.BoxGeometry(0.05, 0.9, halfWidth * 1.7),
-    new THREE.MeshStandardMaterial({ color: 0x1a2733, metalness: 0.8, roughness: 0.1 }),
-  );
-  windshield.position.set(halfLength + 0.01, 0.6, 0);
-  const tyres = new THREE.MeshStandardMaterial({ color: 0x1b1b1b, roughness: 0.9 });
-  truck.add(trailer, cab, windshield);
-  for (const x of [halfLength - 1.5, -halfLength + 2.5, -halfLength + 1.2]) {
-    for (const z of [-halfWidth + 0.2, halfWidth - 0.2]) {
-      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16), tyres);
-      wheel.rotation.x = Math.PI / 2;
-      wheel.position.set(x, -halfHeight + 0.5 - 0.1, z);
-      truck.add(wheel);
-    }
-  }
-  truck.traverse((o) => (o.castShadow = true));
-  truck.userData.headlights = null;
-  return truck;
 }
 
 const kmh = (v) => v / 3.6;

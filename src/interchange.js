@@ -3,7 +3,7 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import { sampleAt } from './track.js';
 import { groundLayer, LAYER, RIGHT_SHOULDER } from './world.js';
 import { cuttingDepth, CUTTING_REACH } from './terrain.js';
-import { buildCarMesh, addStaticWheels, CAR_SIZE } from './car.js';
+import { buildVehicle } from './vehicles.js';
 import { concreteTexture } from './textures.js';
 
 // The Henday's interchanges, simplified to diamonds: the crossing road goes
@@ -299,7 +299,7 @@ class Interchange {
     this.cars = [];
     for (let k = 0; k < CROSS_TRAFFIC; k++) {
       const dir = k % 2 === 0 ? 1 : -1;
-      const mesh = addStaticWheels(buildCarMesh([0xf2f2f2, 0x1f4e8c, 0x8a9199, 0x5b2333][k]));
+      const mesh = buildVehicle(['pickup', 'sedan', 'suv', 'hatch'][k], [0xf2f2f2, 0x1f4e8c, 0x8a9199, 0x5b2333][k]);
       this.add(mesh);
       this.cars.push({
         mesh,
@@ -321,7 +321,7 @@ class Interchange {
       const y = this.roadY(car.u);
       // Nose up or down with the road.
       const pitch = Math.atan2(this.roadY(car.u + car.dir * 2) - y, 2);
-      car.mesh.position.copy(this.at(car.v, car.u, y + CAR_SIZE.rideHeight));
+      car.mesh.position.copy(this.at(car.v, car.u, y));
       car.mesh.rotation.set(0, Math.atan2(-this.n.z * car.dir, this.n.x * car.dir), pitch, 'YXZ');
     }
   }
